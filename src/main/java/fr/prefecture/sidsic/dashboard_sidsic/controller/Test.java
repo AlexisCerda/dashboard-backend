@@ -1,4 +1,4 @@
-package fr.prefecture.sidsic.dashboard_sidsic;
+package fr.prefecture.sidsic.dashboard_sidsic.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
