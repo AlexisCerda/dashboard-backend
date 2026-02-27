@@ -33,4 +33,15 @@ public class MembreService {
         nouveauMembre.setPassword(motDePasseEnClair);
         return membreRepository.save(nouveauMembre);
     }
+
+    public Membre verifierConnexion(String email, String motDePasse) {
+        Membre leMembre = membreRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // Plus tard, avec BCrypt, on utilisera : passwordEncoder.matches(motDePasse, leMembre.getPassword())
+        if (!leMembre.getPassword().equals(motDePasse)) {
+            throw new RuntimeException("Mot de passe incorrect");
+        }
+        return leMembre;
+    }
 }
