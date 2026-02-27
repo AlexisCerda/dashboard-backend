@@ -1,6 +1,7 @@
 package fr.prefecture.sidsic.dashboard_sidsic.controller;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.LoginRequest;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
 import fr.prefecture.sidsic.dashboard_sidsic.service.MembreService;
 import org.springframework.http.HttpStatus;
@@ -26,8 +27,11 @@ public class AuthController {
             // 1. On demande au Service de faire le sale boulot (vérifier en base de données)
             Membre membreConnecte = membreService.verifierConnexion(requeteConnexion.getEmail(),requeteConnexion.getMotDePasse());
             
+            MembreDTO reponseSecurisee = new MembreDTO();
+            reponseSecurisee.setId(membreConnecte.getId());
+            reponseSecurisee.setNom(membreConnecte.getNom());
             // On renvoie un code HTTP 200 (OK) avec les infos de l'agent.
-            return ResponseEntity.ok(membreConnecte);
+            return ResponseEntity.ok(reponseSecurisee);
 
         } catch (RuntimeException erreur) {
             // On renvoie un code HTTP 401 (Unauthorized) avec le message d'erreur.

@@ -1,6 +1,6 @@
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,6 +18,7 @@ public class Membre {
     @Version
     private int version;
 
+    private String email;
     private String password;
     @ManyToMany
     @JoinTable(
@@ -25,10 +26,10 @@ public class Membre {
         joinColumns = @JoinColumn(name = "IDmembre"),
         inverseJoinColumns = @JoinColumn(name = "IDtache")
     )
-    private ArrayList<Tache> taches;
+    private List<Tache> taches;
 
     @OneToMany(mappedBy = "membre")
-    private ArrayList<Note> notes;
+    private List<Note> notes;
 
     private String Nom;
     private String Prenom;
@@ -38,8 +39,8 @@ public class Membre {
     private Groupe Current_groupe;
 
     @ManyToMany(mappedBy = "membres")
-    private ArrayList<Groupe> groupes;
+    private List<Groupe> groupes;
 
     @OneToMany(mappedBy = "admin")
-    private ArrayList<Groupe> groupes_admin;
+    private List<Groupe> groupes_admin;
 }

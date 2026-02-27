@@ -1,5 +1,5 @@
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
-import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,20 +29,20 @@ public class Groupe {
         joinColumns = @JoinColumn(name = "IDgroupe"),
         inverseJoinColumns = @JoinColumn(name = "IDmembre")
     )
-    private ArrayList<Membre> membres;
+    private List<Membre> membres;
 
     @OneToMany(mappedBy = "Current_groupe")
-    private ArrayList<Membre> membres_current;
+    private List<Membre> membres_current;
 
     @OneToMany(mappedBy = "groupe")
-    private ArrayList<Achat> achats;
+    private List<Achat> achats;
 
     @OneToMany(mappedBy = "groupe")
-    private ArrayList<Pret> prets;
+    private List<Pret> prets;
 
     @OneToMany(mappedBy = "groupe")
-    private ArrayList<Mouvement> mouvements;
+    private List<Mouvement> mouvements;
 
     @OneToMany(mappedBy = "groupe")
-    private ArrayList<Tache> taches;
+    private List<Tache> taches;
 }

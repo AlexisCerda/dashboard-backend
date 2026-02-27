@@ -1,7 +1,7 @@
 
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,9 +22,9 @@ public class Materiel {
     private String marque;
 
     @OneToMany(mappedBy = "materiel")
-    ArrayList<Achat> achats;
+    List<Achat> achats;
 
     @OneToMany(mappedBy = "materiel")
-    ArrayList<Pret> prets;
+    List<Pret> prets;
     
 }
