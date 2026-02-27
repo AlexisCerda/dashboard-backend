@@ -18,6 +18,7 @@ public class Membre {
     @Version
     private int version;
 
+    private String password;
     @ManyToMany
     @JoinTable(
         name = "Tache2Membre",

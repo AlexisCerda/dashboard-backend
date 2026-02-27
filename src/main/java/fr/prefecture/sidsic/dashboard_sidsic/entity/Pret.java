@@ -15,7 +15,7 @@ public class Pret {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int ID;
+    private Integer ID;
 
     @Version
     private int version;
