@@ -1,0 +1,38 @@
+package fr.prefecture.sidsic.dashboard_sidsic.entity;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+
+import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatTache;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class Tache {
+    public Tache(){}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int ID;
+
+    @Version
+    private int version;
+
+    @ManyToOne
+    @JoinColumn(name="IDgroupe")
+    private Groupe groupe;
+
+    private String nom;
+    private String Description;
+    private LocalDate dateDebut;
+    private LocalDate dateLimite;
+
+    @Enumerated(EnumType.STRING)
+    private EtatTache etat;
+
+    @ManyToMany(mappedBy = "taches")
+    private ArrayList<Membre> membres;
+
+}
