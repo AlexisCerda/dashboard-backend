@@ -15,7 +15,7 @@ public class Tache {
     public Tache(){}
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int ID;
+    private Integer ID;
 
     @Version
     private int version;

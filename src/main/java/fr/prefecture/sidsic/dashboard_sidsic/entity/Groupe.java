@@ -12,7 +12,7 @@ public class Groupe {
     public Groupe(){}
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int ID;
+    private Integer ID;
     @Version
     private int version;
 
@@ -45,8 +45,4 @@ public class Groupe {
 
     @OneToMany(mappedBy = "groupe")
     private ArrayList<Tache> taches;
-
-
-
-
 }

@@ -15,7 +15,7 @@ public class Materiel {
     public Materiel(){}
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Version
     private int version;
     private String nom;

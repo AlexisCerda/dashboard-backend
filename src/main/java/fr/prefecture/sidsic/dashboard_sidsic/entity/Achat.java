@@ -9,12 +9,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Achat {
-
     public Achat(){}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int ID;
+    private Integer ID;
     @Version
     private int version;
 
