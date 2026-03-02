@@ -24,9 +24,8 @@ public class Achat {
     @Enumerated(EnumType.STRING)
     private EtatAchat etat_courant;
 
-    @ManyToOne
-    @JoinColumn(name="IDmateriel")
-    private Materiel materiel;
+    private String NomMateriel;
+    private String MarqueMateriel;
 
     @ManyToOne
     @JoinColumn(name="IDgroupe")

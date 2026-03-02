@@ -38,6 +38,6 @@ public class Membre {
     @JoinColumn(name = "CurrentGroupe")
     private Groupe Current_groupe;
 
-    @OneToMany(mappedBy = "membre")
+    @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<MembreGroupe> groupes;
 }

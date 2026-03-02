@@ -32,15 +32,24 @@ public class MembreService {
     public Optional<Membre> getMembreById(Long id){
         return membreRepository.findById(id);
     }
+    public Optional<Membre> getMembreByEmail(String mail){
+        return membreRepository.findByEmail(mail);
+    }
 
-    public Membre creerUnNouveauMembre(Membre nouveauMembre, String motDePasseEnClair) {
-        //String motDePasseCrypte = passwordEncoder.encode(motDePasseEnClair);
-        //nouveauMembre.setPassword(motDePasseCrypte);
-        motDePasseEnClair = this.Encrypted(motDePasseEnClair);
-        nouveauMembre.setPassword(motDePasseEnClair);
-        nouveauMembre.setNom(nouveauMembre.getNom().toUpperCase());
-        nouveauMembre.setPrenom(nouveauMembre.getPrenom().toUpperCase());
-        return membreRepository.save(nouveauMembre);
+    public Membre creerUnNouveauMembre(MembreDTO nouveauMembre, String mdp)throws RuntimeException {
+        if (this.getMembreByEmail(nouveauMembre.getEmail()).isPresent()) {
+            throw new RuntimeException("L'Email est deja pris !");
+        }
+        if (!nouveauMembre.getEmail().contains("@")) {
+            throw new RuntimeException("Veuillez entrer une adresse mail valide");
+        }
+        Membre m = new Membre();
+        String motDePasseEnClair = this.Encrypted(mdp);
+        m.setPassword(motDePasseEnClair);
+        m.setNom(nouveauMembre.getNom().toUpperCase());
+        m.setPrenom(nouveauMembre.getPrenom().toUpperCase());
+        m.setEmail(nouveauMembre.getEmail());
+        return membreRepository.save(m);
     }
 
     public Membre verifierConnexion(String email, String motDePasse) {
@@ -76,5 +85,15 @@ public class MembreService {
         }
         Membre m = membre.get();
         return GetMembreDTO(m);
+    }
+    public Membre GetMembre(Optional<Membre> membre)throws RuntimeException{
+        if (!membre.isPresent()) {
+            throw new RuntimeException("Le membre n'existe pas");
+        }
+        return membre.get();
+    }
+
+    public void DelMembre(Membre m){
+        membreRepository.delete(m);
     }
 }

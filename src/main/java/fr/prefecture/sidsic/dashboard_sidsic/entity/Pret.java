@@ -20,9 +20,8 @@ public class Pret {
     @Version
     private int version;
 
-    @ManyToOne
-    @JoinColumn(name="IDmateriel")
-    private Materiel materiel;
+    private String NomMateriel;
+    private String MarqueMateriel;
 
     @ManyToOne
     @JoinColumn(name="IDgroupe")

@@ -20,7 +20,7 @@ public class Groupe {
     private String ville;
     
 
-    @OneToMany(mappedBy = "groupe")
+    @OneToMany(mappedBy = "groupe",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<MembreGroupe> membres;
 
     @OneToMany(mappedBy = "Current_groupe")
