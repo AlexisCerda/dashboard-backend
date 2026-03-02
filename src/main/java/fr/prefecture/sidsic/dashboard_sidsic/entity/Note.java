@@ -10,7 +10,7 @@ import lombok.Setter;
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer ID;
+    private Long ID;
 
     @Version
     private int version;

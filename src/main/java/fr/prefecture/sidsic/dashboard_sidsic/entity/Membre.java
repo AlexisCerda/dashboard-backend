@@ -13,7 +13,7 @@ public class Membre {
     public Membre(){}
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Version
     private int version;
