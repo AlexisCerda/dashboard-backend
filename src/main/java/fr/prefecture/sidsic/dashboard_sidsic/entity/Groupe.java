@@ -19,30 +19,23 @@ public class Groupe {
     private String nom;
     private String ville;
     
-    @ManyToOne
-    @JoinColumn(name = "IDadmin")
-    private Membre admin;
 
-    @ManyToMany
-    @JoinTable(
-        name = "Groupe2Membre",
-        joinColumns = @JoinColumn(name = "IDgroupe"),
-        inverseJoinColumns = @JoinColumn(name = "IDmembre")
-    )
-    private List<Membre> membres;
+    @OneToMany(mappedBy = "groupe")
+    private List<MembreGroupe> membres;
 
     @OneToMany(mappedBy = "Current_groupe")
     private List<Membre> membres_current;
 
-    @OneToMany(mappedBy = "groupe")
+    @OneToMany(mappedBy = "groupe" , cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Achat> achats;
 
-    @OneToMany(mappedBy = "groupe")
+    @OneToMany(mappedBy = "groupe" , cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Pret> prets;
 
-    @OneToMany(mappedBy = "groupe")
+    @OneToMany(mappedBy = "groupe" , cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Mouvement> mouvements;
 
-    @OneToMany(mappedBy = "groupe")
+    @OneToMany(mappedBy = "groupe" , cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Tache> taches;
 }
+

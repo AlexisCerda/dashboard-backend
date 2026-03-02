@@ -28,7 +28,7 @@ public class Membre {
     )
     private List<Tache> taches;
 
-    @OneToMany(mappedBy = "membre")
+    @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Note> notes;
 
     private String Nom;
@@ -38,9 +38,6 @@ public class Membre {
     @JoinColumn(name = "CurrentGroupe")
     private Groupe Current_groupe;
 
-    @ManyToMany(mappedBy = "membres")
-    private List<Groupe> groupes;
-
-    @OneToMany(mappedBy = "admin")
-    private List<Groupe> groupes_admin;
+    @OneToMany(mappedBy = "membre")
+    private List<MembreGroupe> groupes;
 }
