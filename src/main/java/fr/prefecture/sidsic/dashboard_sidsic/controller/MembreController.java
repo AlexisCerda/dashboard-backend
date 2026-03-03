@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreUpdateDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
+import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 import fr.prefecture.sidsic.dashboard_sidsic.service.MembreService;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -25,9 +27,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 @CrossOrigin(origins ="*")
 public class MembreController {
     private final MembreService membreService;
+    private final GroupeService groupeService;
 
-    public MembreController(MembreService membreService) {
+    public MembreController(MembreService membreService, GroupeService groupeService) {
         this.membreService = membreService;
+        this.groupeService = groupeService;
     }
 
     
@@ -88,6 +92,15 @@ public class MembreController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 
+        }
+    }
+
+    @PatchMapping("/updatecurrentgroupe/{idgroupe}")
+    public ResponseEntity<?> updateCurrentGroupe(@RequestBody MembreDTO membre, @PathVariable Long idgroupe) {
+        try {
+            return ResponseEntity.ok(groupeService.updateCurrentGroupe(membre.getId(), idgroupe));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 }

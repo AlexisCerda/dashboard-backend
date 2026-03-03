@@ -1,3 +1,5 @@
+package fr.prefecture.sidsic.dashboard_sidsic.controller;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,7 +33,7 @@ public class TacheController {
     }
 
     @GetMapping("/getMembreid{id}")
-    public ResponseEntity<?> getTacheByMembre(@PathVariable Long idmembre){
+    public ResponseEntity<?> getTacheByMembre(@PathVariable("id") Long idmembre){
         try {
             return ResponseEntity.ok(membreService.GetMembre(membreService.getMembreById(idmembre)).getTaches());
         } catch (RuntimeException e) {
@@ -40,7 +42,7 @@ public class TacheController {
     }
 
     @GetMapping("/getGroupeid{id}")
-    public ResponseEntity<?> getTacheByGroupe(@PathVariable Long idgroupe){
+    public ResponseEntity<?> getTacheByGroupe(@PathVariable("id") Long idgroupe){
         try {
             return ResponseEntity.ok(groupeService.getGroupeById(idgroupe).getTaches());
         } catch (RuntimeException e) {

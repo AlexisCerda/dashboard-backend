@@ -111,6 +111,7 @@ public class MembreService {
         }
     }
 
+
     //##### PARTIE TACHE ######
 
     @Transactional
