@@ -26,6 +26,7 @@ public class Achat {
 
     private String NomMateriel;
     private String MarqueMateriel;
+    private String Reference;
 
     @ManyToOne
     @JoinColumn(name="IDgroupe")

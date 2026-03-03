@@ -1,6 +1,7 @@
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatTache;
@@ -33,6 +34,6 @@ public class Tache {
     private EtatTache etat;
 
     @ManyToMany(mappedBy = "taches")
-    private List<Membre> membres;
+    private List<Membre> membres = new ArrayList<>();
 
 }
