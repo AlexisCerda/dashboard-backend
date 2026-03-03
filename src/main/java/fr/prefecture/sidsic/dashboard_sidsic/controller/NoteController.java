@@ -29,7 +29,7 @@ public class NoteController {
         this.membreService = membreService;
         this.noteRepository = noteRepository;
     }
-    @GetMapping("/getbymembre{id}")
+    @GetMapping("/getbymembre/{id}")
     public ResponseEntity<?> getNotesByMembre(@PathVariable Long idmembre){
         try {
             return ResponseEntity.ok(membreService.GetMembre(membreService.getMembreById(idmembre)).getNotes());
@@ -45,7 +45,7 @@ public class NoteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-    @GetMapping("/create")
+    @PostMapping("/create")
     public ResponseEntity<?> createNoteByMembre(@RequestBody Note note){
         try {
             Note n = new Note();
@@ -56,7 +56,7 @@ public class NoteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-    @DeleteMapping("/delete{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteNote(@PathVariable Long id){
         try {
             Optional<Note> n = noteRepository.findById(id);
