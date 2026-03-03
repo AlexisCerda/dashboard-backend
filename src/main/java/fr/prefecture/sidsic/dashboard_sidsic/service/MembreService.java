@@ -177,7 +177,7 @@ public class MembreService {
     }
 
     public Tache updateTache(Tache tache) {
-        Tache existingTache = tacheRepository.findById(tache.getID())
+        Tache existingTache = tacheRepository.findById(tache.getId())
                 .orElseThrow(() -> new RuntimeException("Tache not found"));
         existingTache.setNom(tache.getNom());
         existingTache.setDescription(tache.getDescription());

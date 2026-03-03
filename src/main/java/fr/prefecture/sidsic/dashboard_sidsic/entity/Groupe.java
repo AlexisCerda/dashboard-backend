@@ -12,7 +12,7 @@ public class Groupe {
     public Groupe(){}
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
     @Version
     private int version;
 

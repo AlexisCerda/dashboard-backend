@@ -108,7 +108,7 @@ public class GroupeService {
 
     public GroupeDTO convertToDTO(Groupe groupe) {
         GroupeDTO groupeDTO = new GroupeDTO();
-        groupeDTO.setId(groupe.getID());
+        groupeDTO.setId(groupe.getId());
         groupeDTO.setNom(groupe.getNom());
         groupeDTO.setVille(groupe.getVille());
         return groupeDTO;
