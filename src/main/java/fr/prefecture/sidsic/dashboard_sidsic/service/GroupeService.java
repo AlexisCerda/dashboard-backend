@@ -32,6 +32,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class GroupeService {
+        
     private final GroupeRepository groupeRepository;
     private final MembreRepository membreRepository;
     private final MembreGroupeRepository membreGroupeRepository;
@@ -469,6 +470,7 @@ public AchatDTO createAchat(AchatDTO achatDTO, Long idGroupe) {
     achat.setPrenomPersonne(achatDTO.getPrenomPersonne());
     achat.setQuantite(achatDTO.getQuantite());
     achat.setGroupe(groupe);
+    achat.setEtat(EtatAchat.A_ACHETER);
     achatRepository.save(achat);
     AchatDTO createdAchatDTO = new AchatDTO();
     createdAchatDTO.setId(achat.getId());
@@ -494,7 +496,7 @@ public void deleteAchat(Long idAchat, Long idGroupe) {
 public EtatAchat getEtatsAchat(Long idAchat) {
     Achat achat = achatRepository.findById(idAchat)
             .orElseThrow(() -> new RuntimeException("Achat not found"));
-    return achat.getEtat_courant();
+    return achat.getEtat();
 }
 public List<EtatAchat> getAllEtatsAchat() {
     List<EtatAchat> etats = new ArrayList<>();
@@ -503,4 +505,48 @@ public List<EtatAchat> getAllEtatsAchat() {
     }
     return etats;
 }
+        public Mouvement getMouvementById(Long id) {
+            Mouvement mouvement = mouvementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mouvement not found"));
+            return mouvement;
+        }
+
+        public Achat getAchatById(Long id) {
+            Achat achat = achatRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Achat not found"));
+            return achat;
+        }
+
+        public Pret getPretById(Long id) {
+            Pret pret = pretRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pret not found"));
+            return pret;
+        }
+
+        @Transactional
+        public MouvementDTO updateMouvementEtat(Mouvement dto) {
+            Mouvement mouvement = mouvementRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Mouvement not found"));
+            mouvement.setEtat(dto.getEtat());
+            mouvementRepository.save(mouvement);
+            return convertMouvementToDTO(mouvement);
+        }
+
+        @Transactional
+        public AchatDTO updateAchatEtat(Achat dto) {
+            Achat achat = achatRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Achat not found"));
+            achat.setEtat(dto.getEtat());
+            achatRepository.save(achat);
+            return convertAchatToDTO(achat);
+        }
+
+        @Transactional
+        public PretDTO updatePretEtat(Pret dto) {
+            Pret pret = pretRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Pret not found"));
+            pret.setEtat(dto.getEtat());
+            pretRepository.save(pret);
+            return convertPretToDTO(pret);
+        }
 }

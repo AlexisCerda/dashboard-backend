@@ -9,6 +9,7 @@ public class AchatDTO {
     private Long id;
     private String nomMateriel;
     private String marqueMateriel;
+    private String reference;
     private String nomPersonne;
     private String prenomPersonne;
     private int quantite;

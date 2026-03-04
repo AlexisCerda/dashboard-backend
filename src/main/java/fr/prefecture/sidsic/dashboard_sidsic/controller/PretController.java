@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.prefecture.sidsic.dashboard_sidsic.dto.EtatPretDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.PretDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Pret;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 
 @RestController
@@ -33,6 +36,16 @@ public class PretController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+        @PatchMapping("/updateEtat/{id}")
+        public ResponseEntity<?> updateEtatPret(@PathVariable Long id, @RequestBody EtatPretDTO dto){
+            try {
+                Pret pret = groupeService.getPretById(id);
+                pret.setEtat(dto.getEtat());
+                    return ResponseEntity.ok(groupeService.updatePretEtat(pret));
+            } catch (RuntimeException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            }
+        }
 
     @PutMapping("/update/{idgroupe}")
     public ResponseEntity<?> updatePret(@RequestBody PretDTO pret, @PathVariable Long idgroupe) {

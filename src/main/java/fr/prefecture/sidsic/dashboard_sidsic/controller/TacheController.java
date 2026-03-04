@@ -24,6 +24,9 @@ import fr.prefecture.sidsic.dashboard_sidsic.service.MembreService;
 @RequestMapping("api/tache")
 @CrossOrigin(origins ="*")
 public class TacheController {
+    public static class EtatTacheDTO {
+        public EtatTache etat;
+    }
 
     private final MembreService membreService;
     private final GroupeService groupeService;
@@ -36,7 +39,7 @@ public class TacheController {
     @GetMapping("/getMembreid{id}")
     public ResponseEntity<?> getTacheByMembre(@PathVariable("id") Long idmembre){
         try {
-            return ResponseEntity.ok(membreService.GetMembre(membreService.getMembreById(idmembre)).getTaches());
+            return ResponseEntity.ok(membreService.getTacheDTO(membreService.GetMembre(membreService.getMembreById(idmembre))));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -99,12 +102,13 @@ public class TacheController {
     }
 
     @PatchMapping("/updateEtat/{id}")
-    public ResponseEntity<?> updateEtatTache(@PathVariable Long id, @RequestBody EtatTache etat){
+    public ResponseEntity<?> updateEtatTache(@PathVariable Long id, @RequestBody EtatTacheDTO dto){
         try {
             Tache tache = membreService.getTacheById(id);
-            tache.setEtat(etat);
+            tache.setEtat(dto.etat);
             membreService.updateTache(tache);
-            return ResponseEntity.ok(tache);
+            TacheDTO tacheDTO = membreService.convertTacheToDTO(tache);
+            return ResponseEntity.ok(tacheDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

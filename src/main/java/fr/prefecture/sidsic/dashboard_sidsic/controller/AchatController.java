@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.AchatDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.EtatAchatDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Achat;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 
 
@@ -41,6 +44,16 @@ public class AchatController {
 			return ResponseEntity.ok(groupeService.updateAchat(achat, idgroupe));
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+		}
+	}
+	@PatchMapping("/updateEtat/{id}")
+	public ResponseEntity<?> updateEtatAchat(@PathVariable Long id, @RequestBody EtatAchatDTO dto){
+		try {
+			Achat achat = groupeService.getAchatById(id);
+			achat.setEtat(dto.getEtat());
+			return ResponseEntity.ok(groupeService.updateAchatEtat(achat));
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
 	}
 

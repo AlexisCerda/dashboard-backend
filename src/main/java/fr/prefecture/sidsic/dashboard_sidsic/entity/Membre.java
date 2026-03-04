@@ -3,6 +3,7 @@ package fr.prefecture.sidsic.dashboard_sidsic.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

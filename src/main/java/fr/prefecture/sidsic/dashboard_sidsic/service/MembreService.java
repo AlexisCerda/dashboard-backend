@@ -11,6 +11,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Groupe;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Tache;
+import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatTache;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.TacheRepository;
 import jakarta.transaction.Transactional;
@@ -146,7 +147,7 @@ public class MembreService {
         return getAllMembresByTache(idTache);
     }
 
-    public Tache updateTacheDTO(TacheDTO tacheDTO) {
+    public TacheDTO updateTacheDTO(TacheDTO tacheDTO) {
         Tache tache = tacheRepository.findById(tacheDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Tache not found"));
 
@@ -155,12 +156,17 @@ public class MembreService {
         tache.setDateDebut(tacheDTO.getDateDebut());
         tache.setDateLimite(tacheDTO.getDateLimite());
 
-        return tacheRepository.save(tache);
+        return this.convertTacheToDTO(tacheRepository.save(tache));
     }
     @Transactional
     public void deleteTache(Long id) {
         Tache tache = tacheRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tache not found"));
+            .orElseThrow(() -> new RuntimeException("Tache not found"));
+        for (Membre membre : new ArrayList<>(tache.getMembres())) {
+            membre.getTaches().remove(tache);
+        }
+        tache.getMembres().clear();
+        tacheRepository.save(tache);
         tacheRepository.delete(tache);
     }
 
@@ -178,6 +184,7 @@ public class MembreService {
         tache.setDescription(tacheDTO.getDescription());
         tache.setDateDebut(tacheDTO.getDateDebut());
         tache.setDateLimite(tacheDTO.getDateLimite());
+        tache.setEtat(EtatTache.A_FAIRE);
         tacheRepository.save(tache);
 
         return tacheDTO;
@@ -196,5 +203,28 @@ public class MembreService {
         existingTache.setDateDebut(tache.getDateDebut());
         existingTache.setDateLimite(tache.getDateLimite());
         return tacheRepository.save(existingTache);
+    }
+    public List<TacheDTO> getTacheDTO(Membre membre) {
+        List<Tache> taches = membre.getTaches();
+        List<TacheDTO> tachesDTO = new ArrayList<>();
+        for (Tache tache : taches) {
+            TacheDTO tacheDTO = new TacheDTO();
+            tacheDTO.setId(tache.getId());
+            tacheDTO.setNom(tache.getNom());
+            tacheDTO.setDescription(tache.getDescription());
+            tacheDTO.setDateDebut(tache.getDateDebut());
+            tacheDTO.setDateLimite(tache.getDateLimite());
+            tachesDTO.add(tacheDTO);
+        }
+        return tachesDTO;
+    }
+    public TacheDTO convertTacheToDTO(Tache tache) {
+        TacheDTO dto = new TacheDTO();
+        dto.setId(tache.getId());
+        dto.setNom(tache.getNom());
+        dto.setDescription(tache.getDescription());
+        dto.setDateDebut(tache.getDateDebut());
+        dto.setDateLimite(tache.getDateLimite());
+        return dto;
     }
 }

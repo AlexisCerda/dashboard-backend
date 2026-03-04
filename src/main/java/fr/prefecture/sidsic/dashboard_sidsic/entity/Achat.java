@@ -22,7 +22,7 @@ public class Achat {
     private String PrenomPersonne;
 
     @Enumerated(EnumType.STRING)
-    private EtatAchat etat_courant;
+    private EtatAchat etat;
 
     private String NomMateriel;
     private String MarqueMateriel;

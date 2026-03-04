@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MouvementDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Mouvement;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.EtatMouvementDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 
 @RestController
@@ -33,6 +36,16 @@ public class MouvementController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+        @PatchMapping("/updateEtat/{id}")
+        public ResponseEntity<?> updateEtatMouvement(@PathVariable Long id, @RequestBody EtatMouvementDTO dto){
+            try {
+                Mouvement mouvement = groupeService.getMouvementById(id);
+                mouvement.setEtat(dto.getEtat());
+                return ResponseEntity.ok(groupeService.updateMouvementEtat(mouvement));
+            } catch (RuntimeException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            }
+        }
 
     @PutMapping("/update/{idgroupe}")
     public ResponseEntity<?> UpdateMouvement(@RequestBody MouvementDTO mouvement, @PathVariable Long idgroupe) {
