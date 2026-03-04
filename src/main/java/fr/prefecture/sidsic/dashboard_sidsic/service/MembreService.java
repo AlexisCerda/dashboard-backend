@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Groupe;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Tache;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreRepository;
@@ -18,7 +19,6 @@ import jakarta.transaction.Transactional;
 public class MembreService {
     private final MembreRepository  membreRepository;
     private final TacheRepository tacheRepository;
-
     //private final BCryptPasswordEncoder passwordEncoder;
 
     public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository) {
@@ -37,13 +37,15 @@ public class MembreService {
     }
 
     public Optional<Membre> getMembreById(Long id){
-        return membreRepository.findById(id);
+        Optional<Membre> membre = membreRepository.findById(id);
+        return membre;
     }
     public Optional<Membre> getMembreByEmail(String mail){
-        return membreRepository.findByEmail(mail);
+        Optional<Membre> membre = membreRepository.findByEmail(mail);
+        return membre;
     }
 
-    public Membre creerUnNouveauMembre(MembreDTO nouveauMembre, String mdp)throws RuntimeException {
+    public MembreDTO creerUnNouveauMembre(MembreDTO nouveauMembre, String mdp)throws RuntimeException {
         if (this.getMembreByEmail(nouveauMembre.getEmail()).isPresent()) {
             throw new RuntimeException("L'Email est deja pris !");
         }
@@ -56,14 +58,13 @@ public class MembreService {
         m.setNom(nouveauMembre.getNom().toUpperCase());
         m.setPrenom(nouveauMembre.getPrenom().toUpperCase());
         m.setEmail(nouveauMembre.getEmail());
-        return membreRepository.save(m);
+        Membre saved = membreRepository.save(m);
+        return GetMembreDTO(saved);
     }
 
     public Membre verifierConnexion(String email, String motDePasse) {
         Membre leMembre = membreRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-        // Plus tard, avec BCrypt, on utilisera : passwordEncoder.matches(motDePasse, leMembre.getPassword())
+            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
         if (!leMembre.getPassword().equals(motDePasse)) {
             throw new RuntimeException("Mot de passe incorrect");
         }
@@ -74,8 +75,9 @@ public class MembreService {
         return Pwd;
     }
 
-    public Membre SaveBD(Membre m){
-        return membreRepository.save(m);
+    public MembreDTO SaveBD(Membre m){
+        Membre saved = membreRepository.save(m);
+        return GetMembreDTO(saved);
     }
 
     public MembreDTO GetMembreDTO(Membre m){
@@ -99,28 +101,31 @@ public class MembreService {
         }
         return membre.get();
     }
-
+    @Transactional
     public void DelMembre(Membre m){
         membreRepository.delete(m);
     }
 
-    public List<Membre> getAllMembresByTache(Long idTache){
+    public List<MembreDTO> getAllMembresByTache(Long idTache){
         Tache tache = tacheRepository.findById(idTache)
-                .orElseThrow(() -> new RuntimeException("Tache not found"));{
-        return tache.getMembres();
+            .orElseThrow(() -> new RuntimeException("Tache not found"));
+        List<Membre> membres = tache.getMembres();
+        List<MembreDTO> membresDTO = new ArrayList<>();
+        for (Membre membre : membres) {
+            membresDTO.add(GetMembreDTO(membre));
         }
+        return membresDTO;
     }
 
 
     //##### PARTIE TACHE ######
 
     @Transactional
-    public List<Membre> addMembreToTache(Long idMembre, Long idTache) {
+    public List<MembreDTO> addMembreToTache(Long idMembre, Long idTache) {
         Membre membre = membreRepository.findById(idMembre)
-                .orElseThrow(() -> new RuntimeException("Membre not found"));
+            .orElseThrow(() -> new RuntimeException("Membre not found"));
         Tache tache = tacheRepository.findById(idTache)
-                .orElseThrow(() -> new RuntimeException("Tache not found"));
-
+            .orElseThrow(() -> new RuntimeException("Tache not found"));
         if (!membre.getTaches().contains(tache)) {
             membre.getTaches().add(tache);
             membreRepository.save(membre);
@@ -129,12 +134,11 @@ public class MembreService {
     }
 
     @Transactional
-    public List<Membre> deleteMembreFromTache(Long idMembre, Long idTache) {
+    public List<MembreDTO> deleteMembreFromTache(Long idMembre, Long idTache) {
         Membre membre = membreRepository.findById(idMembre)
-                .orElseThrow(() -> new RuntimeException("Membre not found"));
+            .orElseThrow(() -> new RuntimeException("Membre not found"));
         Tache tache = tacheRepository.findById(idTache)
-                .orElseThrow(() -> new RuntimeException("Tache not found"));
-
+            .orElseThrow(() -> new RuntimeException("Tache not found"));
         if (membre.getTaches().contains(tache)) {
             membre.getTaches().remove(tache);
             membreRepository.save(membre);
@@ -153,16 +157,24 @@ public class MembreService {
 
         return tacheRepository.save(tache);
     }
-
+    @Transactional
     public void deleteTache(Long id) {
         Tache tache = tacheRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tache not found"));
         tacheRepository.delete(tache);
     }
 
-    public TacheDTO addTache(TacheDTO tacheDTO) {
+    public TacheDTO addTache(TacheDTO tacheDTO, Groupe groupe) {
+        // Vérification d'unicité : même nom de tâche dans le même groupe
+        if (tacheDTO.getNom() != null && tacheDTO.getNom().trim().length() > 0 && tacheDTO.getId() != null) {
+            Tache tacheExistante = tacheRepository.findById(tacheDTO.getId()).orElse(null);
+            if (tacheExistante != null && tacheExistante.getNom().equalsIgnoreCase(tacheDTO.getNom())) {
+                throw new RuntimeException("Cette tâche existe déjà dans ce groupe");
+            }
+        }
         Tache tache = new Tache();
         tache.setNom(tacheDTO.getNom());
+        tache.setGroupe(groupe);
         tache.setDescription(tacheDTO.getDescription());
         tache.setDateDebut(tacheDTO.getDateDebut());
         tache.setDateLimite(tacheDTO.getDateLimite());

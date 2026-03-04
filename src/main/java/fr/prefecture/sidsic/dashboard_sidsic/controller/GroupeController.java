@@ -105,6 +105,15 @@ public class GroupeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+    @PatchMapping("/updatemembretoadminurgent/{idgroupe}/{idmembre}")
+    public ResponseEntity<?> updateMembreToAdminUrgent(@PathVariable Long idgroupe, @PathVariable Long idmembre) {
+        try {
+            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idmembre, idgroupe, true, null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/delete/{idgroupe}")
     public ResponseEntity<?> deleteGroupe(@PathVariable Long idgroupe) {
         try {

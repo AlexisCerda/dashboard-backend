@@ -58,6 +58,9 @@ public class MembreController {
         try {
             Optional<Membre> m = membreService.getMembreById(membre.getId());
             if (m.isPresent()) {
+                if (!membre.getEmail().contains("@")) {
+                    throw new RuntimeException("Veuillez entrer une adresse mail valide");
+                }
                 Membre membreExist = m.get();
                 membreExist.setPrenom(membre.getPrenom());
                 membreExist.setNom(membre.getNom());
@@ -88,17 +91,17 @@ public class MembreController {
     @PostMapping("/create {mdp}")
     public ResponseEntity<?> createMembre(@RequestBody MembreDTO membre, @PathVariable String mdp) {
         try {
-            return ResponseEntity.ok(membreService.GetMembreDTO(membreService.creerUnNouveauMembre(membre,mdp)));
+            return ResponseEntity.ok((membreService.creerUnNouveauMembre(membre,mdp)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 
         }
     }
 
-    @PatchMapping("/updatecurrentgroupe/{idgroupe}")
-    public ResponseEntity<?> updateCurrentGroupe(@RequestBody MembreDTO membre, @PathVariable Long idgroupe) {
+    @PatchMapping("/updatecurrentgroupe/{idgroupe}/{idmembre}")
+    public ResponseEntity<?> updateCurrentGroupe(@PathVariable Long idmembre, @PathVariable Long idgroupe) {
         try {
-            return ResponseEntity.ok(groupeService.updateCurrentGroupe(membre.getId(), idgroupe));
+            return ResponseEntity.ok(groupeService.updateCurrentGroupe(idmembre, idgroupe)); // La méthode service retourne maintenant un DTO
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }

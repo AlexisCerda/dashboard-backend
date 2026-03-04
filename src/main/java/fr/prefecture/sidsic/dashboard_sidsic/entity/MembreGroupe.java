@@ -17,7 +17,7 @@ public class MembreGroupe {
     private int version;
 
     @ManyToOne
-    @JoinColumn(name = "IDmembre")
+    @JoinColumn(name = "idmembre")
     private Membre membre;
     @ManyToOne
     @JoinColumn(name = "IDgroupe")

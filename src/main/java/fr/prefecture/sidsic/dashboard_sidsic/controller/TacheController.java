@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.AddMembreTache;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Groupe;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Tache;
 import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatTache;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
@@ -44,7 +45,8 @@ public class TacheController {
     @GetMapping("/getGroupeid{id}")
     public ResponseEntity<?> getTacheByGroupe(@PathVariable("id") Long idgroupe){
         try {
-            return ResponseEntity.ok(groupeService.getGroupeById(idgroupe).getTaches());
+            Groupe groupe = groupeService.getGroupeById(idgroupe);
+            return ResponseEntity.ok(groupe.getTaches());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -87,10 +89,10 @@ public class TacheController {
         }
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addTache(@RequestBody TacheDTO tacheDTO){
+    @PostMapping("/add{idgroupe}")
+    public ResponseEntity<?> addTache(@RequestBody TacheDTO tacheDTO,@PathVariable Long idgroupe){
         try {
-            return ResponseEntity.ok(membreService.addTache(tacheDTO));
+            return ResponseEntity.ok(membreService.addTache(tacheDTO, groupeService.getGroupeById(idgroupe)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

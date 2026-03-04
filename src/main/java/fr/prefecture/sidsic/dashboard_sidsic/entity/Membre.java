@@ -1,5 +1,6 @@
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -30,6 +31,13 @@ public class Membre {
 
     @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Note> notes;
+
+    public List<Note> getNotes() {
+        if (notes == null) {
+            return new ArrayList<>();
+        }
+        return notes;
+    }
 
     private String Nom;
     private String Prenom;

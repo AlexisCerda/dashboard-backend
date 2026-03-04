@@ -1,6 +1,8 @@
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
+import java.util.ArrayList;
 import java.util.List;
 
+import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,5 +39,20 @@ public class Groupe {
 
     @OneToMany(mappedBy = "groupe" , cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Tache> taches;
+
+    public List<TacheDTO> getTaches() {
+        List<Tache> taches = this.taches;
+        List<TacheDTO> tachesDTO = new ArrayList<>();
+        for (Tache tache : taches) {
+            TacheDTO tacheDTO = new TacheDTO();
+            tacheDTO.setId(tache.getId());
+            tacheDTO.setNom(tache.getNom());
+            tacheDTO.setDescription(tache.getDescription());
+            tacheDTO.setDateDebut(tache.getDateDebut());
+            tacheDTO.setDateLimite(tache.getDateLimite());
+            tachesDTO.add(tacheDTO);
+        }
+        return tachesDTO;
+    }
 }
 

@@ -2,12 +2,15 @@ package fr.prefecture.sidsic.dashboard_sidsic.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.GroupeDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MouvementDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.PretDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.AchatDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Achat;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Groupe;
@@ -15,6 +18,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.MembreGroupe;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Mouvement;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Pret;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Tache;
 import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatMouvement;
 import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatPret;
 import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatAchat;
@@ -34,72 +38,129 @@ public class GroupeService {
     private final MouvementRepository mouvementRepository;
     private final PretRepository pretRepository;
     private final AchatRepository achatRepository;
+    private final MembreService membreService;
 
-    public GroupeService(GroupeRepository groupeRepository, MembreRepository membreRepository, MembreGroupeRepository membreGroupeRepository, MouvementRepository mouvementRepository, PretRepository pretRepository, AchatRepository achatRepository) {
+    public GroupeService(GroupeRepository groupeRepository, MembreRepository membreRepository, MembreGroupeRepository membreGroupeRepository, MouvementRepository mouvementRepository, PretRepository pretRepository, AchatRepository achatRepository, MembreService membreService) {
         this.groupeRepository = groupeRepository;
         this.membreRepository = membreRepository;
         this.membreGroupeRepository = membreGroupeRepository;
         this.mouvementRepository = mouvementRepository;
         this.pretRepository = pretRepository;
         this.achatRepository = achatRepository;
-    }
-    public Groupe getGroupeById(Long id){
-        return groupeRepository.findById(id).orElseThrow(() -> new RuntimeException("Groupe not found"));
+        this.membreService = membreService;
     }
 
-    @Transactional
-    public Groupe updateCurrentGroupe(Long idMembre, Long idGroupe) {
-        Membre membre = membreRepository.findById(idMembre)
-                .orElseThrow(() -> new RuntimeException("Membre not found"));
-        Groupe groupe = groupeRepository.findById(idGroupe)
-                .orElseThrow(() -> new RuntimeException("Groupe not found"));
-        membre.setCurrent_groupe(groupe);
-        membreRepository.save(membre);
+        private GroupeDTO convertToDTO(Groupe groupe) {
+            GroupeDTO dto = new GroupeDTO();
+            dto.setId(groupe.getId());
+            dto.setNom(groupe.getNom());
+            dto.setVille(groupe.getVille());
+            // Ajoutez ici la conversion des listes si besoin
+            return dto;
+        }
+
+        private MouvementDTO convertMouvementToDTO(Mouvement mouvement) {
+            MouvementDTO dto = new MouvementDTO();
+            dto.setId(mouvement.getId());
+            dto.setNom(mouvement.getNom());
+            dto.setPrenom(mouvement.getPrenom());
+            dto.setDateArrivee(mouvement.getDateArrivee());
+            dto.setDateDepart(mouvement.getDateDepart());
+            return dto;
+        }
+
+        private PretDTO convertPretToDTO(Pret pret) {
+            PretDTO dto = new PretDTO();
+            dto.setId(pret.getId());
+            dto.setNomMateriel(pret.getNomMateriel());
+            dto.setMarqueMateriel(pret.getMarqueMateriel());
+            dto.setNomPersonne(pret.getNomPersonne());
+            dto.setPrenomPersonne(pret.getPrenomPersonne());
+            dto.setQuantite(pret.getQuantite());
+            dto.setDateDebut(pret.getDateDebut());
+            dto.setDateFin(pret.getDateFin());
+            return dto;
+        }
+
+        private AchatDTO convertAchatToDTO(Achat achat) {
+            AchatDTO dto = new AchatDTO();
+            dto.setId(achat.getId());
+            dto.setNomMateriel(achat.getNomMateriel());
+            dto.setMarqueMateriel(achat.getMarqueMateriel());
+            dto.setNomPersonne(achat.getNomPersonne());
+            dto.setPrenomPersonne(achat.getPrenomPersonne());
+            dto.setQuantite(achat.getQuantite());
+            return dto;
+        }
+
+        private TacheDTO convertTacheToDTO(Tache tache) {
+            TacheDTO dto = new TacheDTO();
+            dto.setId(tache.getId());
+            dto.setNom(tache.getNom());
+            dto.setDescription(tache.getDescription());
+            dto.setDateDebut(tache.getDateDebut());
+            dto.setDateLimite(tache.getDateLimite());
+            return dto;
+        }
+    public Groupe getGroupeById(Long id){
+        Groupe groupe = groupeRepository.findById(id).orElseThrow(() -> new RuntimeException("Groupe not found"));
         return groupe;
     }
 
-    public List<Membre> getAllAdmin(Long idGroupe) {
+    @Transactional
+    public GroupeDTO updateCurrentGroupe(Long idMembre, Long idGroupe) {
+        Membre membre = membreRepository.findById(idMembre)
+            .orElseThrow(() -> new RuntimeException("Membre not found"));
+        Groupe groupe = groupeRepository.findById(idGroupe)
+            .orElseThrow(() -> new RuntimeException("Groupe not found"));
+        membre.setCurrent_groupe(groupe);
+        membreRepository.save(membre);
+        return convertToDTO(groupe);
+    }
+
+    public List<MembreDTO> getAllAdmin(Long idGroupe) {
         List<MembreGroupe> membresGroupes = membreGroupeRepository.findByGroupeId(idGroupe);
-        List<Membre> membres = new ArrayList<>();
+        List<MembreDTO> membres = new ArrayList<>();
         for (MembreGroupe membreGroupe : membresGroupes) {
             if (membreGroupe.getIsAdmin() == 1) {
-                membres.add(membreGroupe.getMembre());
+                membres.add(membreService.GetMembreDTO(membreGroupe.getMembre()));
             }
         }
         return membres;
     }
 
-    public List<Membre> getAllMembre(Long idGroupe) {
+    public List<MembreDTO> getAllMembre(Long idGroupe) {
         List<MembreGroupe> membresGroupes = membreGroupeRepository.findByGroupeId(idGroupe);
-        List<Membre> membres = new ArrayList<>();
+        List<MembreDTO> membres = new ArrayList<>();
         for (MembreGroupe membreGroupe : membresGroupes) {
-            membres.add(membreGroupe.getMembre());
+            membres.add(membreService.GetMembreDTO(membreGroupe.getMembre()));
         }
         return membres;
     }
 
-    public List<Groupe> getAllByMembre(Long idMembre) {
+    public List<GroupeDTO> getAllByMembre(Long idMembre) {
         Membre membre = membreRepository.findById(idMembre)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
-        List<Groupe> groupes = new ArrayList<>();
+        List<GroupeDTO> groupes = new ArrayList<>();
         for (MembreGroupe membreGroupe : membre.getGroupes()) {
-            groupes.add(membreGroupe.getGroupe());
+            groupes.add(this.convertToDTO(membreGroupe.getGroupe()));
         }
         return groupes;
     }
 
-    public List<Groupe> getAllByMembreAdmin(Long idMembre) {
+    public List<GroupeDTO> getAllByMembreAdmin(Long idMembre) {
         Membre membre = membreRepository.findById(idMembre)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
-        List<Groupe> groupes = new ArrayList<>();
+        List<GroupeDTO> groupes = new ArrayList<>();
         for (MembreGroupe membreGroupe : membre.getGroupes()) {
             if (membreGroupe.getIsAdmin() == 1) {
-                groupes.add(membreGroupe.getGroupe());
+                groupes.add(this.convertToDTO(membreGroupe.getGroupe()));
             }
         }
         return groupes;
     }
 
+    @Transactional
     public void deleteMembre(Long idMembre, Long idGroupe) {
         Membre membre = membreRepository.findById(idMembre)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
@@ -124,37 +185,41 @@ public class GroupeService {
         return this.convertToDTO(groupe);
     }
 
-    public GroupeDTO convertToDTO(Groupe groupe) {
-        GroupeDTO groupeDTO = new GroupeDTO();
-        groupeDTO.setId(groupe.getId());
-        groupeDTO.setNom(groupe.getNom());
-        groupeDTO.setVille(groupe.getVille());
-        return groupeDTO;
-    }
-
-    public List<Membre> addMembreToGroupe(Long idMembre, Long idGroupe, Long idMembreActuel) {
+    public List<MembreDTO> addMembreToGroupe(Long idMembre, Long idGroupe, Long idMembreActuel) {
         Membre membreActuel = membreRepository.findById(idMembreActuel)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
         if (this.getAllAdmin(idGroupe).stream().noneMatch(m -> m.getId().equals(membreActuel.getId()))) {
             throw new RuntimeException("Vous n'êtes pas admin de ce groupe");
         }
         Membre membre = membreRepository.findById(idMembre)
-                .orElseThrow(() -> new RuntimeException("Membre not found"));
+            .orElseThrow(() -> new RuntimeException("Membre not found"));
         Groupe groupe = groupeRepository.findById(idGroupe)
-                .orElseThrow(() -> new RuntimeException("Groupe not found"));
+            .orElseThrow(() -> new RuntimeException("Groupe not found"));
+        // Vérification d'unicité
+        boolean existe = membreGroupeRepository.findAll().stream()
+            .anyMatch(mg -> mg.getMembre().getId().equals(membre.getId()) && mg.getGroupe().getId().equals(groupe.getId()));
+        if (existe) {
+            throw new RuntimeException("Ce membre est déjà dans ce groupe");
+        }
         MembreGroupe membreGroupe = new MembreGroupe();
         membreGroupe.setMembre(membre);
         membreGroupe.setGroupe(groupe);
         membreGroupe.setIsAdmin(0);
         membreGroupeRepository.save(membreGroupe);
-        return this.getAllMembre(idGroupe);
+        ArrayList<MembreDTO> membres = new ArrayList<>();
+        for (MembreDTO membreadd : this.getAllMembre(idGroupe)) {
+            membres.add(membreadd);
+        }
+        return membres;
     }
 
-    public List<Membre> updateMembreToAdmin(Long idMembre, Long idGroupe, Boolean isAdmin, Long idMembreActuel) {
-        Membre membreActuel = membreRepository.findById(idMembreActuel)
-                .orElseThrow(() -> new RuntimeException("Membre not found"));
-        if (this.getAllAdmin(idGroupe).stream().noneMatch(m -> m.getId().equals(membreActuel.getId()))) {
-            throw new RuntimeException("Vous n'êtes pas admin de ce groupe");
+    public List<MembreDTO> updateMembreToAdmin(Long idMembre, Long idGroupe, Boolean isAdmin, Long idMembreActuel) {
+        if (!(idMembreActuel == null)) {
+            Membre membreActuel = membreRepository.findById(idMembreActuel)
+                    .orElseThrow(() -> new RuntimeException("Membre not found"));
+            if (this.getAllAdmin(idGroupe).stream().noneMatch(m -> m.getId().equals(membreActuel.getId()))) {
+                throw new RuntimeException("Vous n'êtes pas admin de ce groupe");
+            }
         }
         Membre membre = membreRepository.findById(idMembre)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
@@ -164,8 +229,13 @@ public class GroupeService {
                 .orElseThrow(() -> new RuntimeException("MembreGroupe not found"));
         membreGroupe.setIsAdmin(isAdmin ? 1 : 0);
         membreGroupeRepository.save(membreGroupe);
-        return this.getAllAdmin(idGroupe);
+        List<MembreDTO> membres = new ArrayList<>();
+        for (MembreDTO membreadd : this.getAllMembre(idGroupe)) {
+            membres.add(membreadd);
+        }
+        return membres;
     }
+    @Transactional
     public void deleteGroupe(Long idGroupe) {
         Groupe groupe = groupeRepository.findById(idGroupe)
                 .orElseThrow(() -> new RuntimeException("Groupe not found"));
@@ -175,10 +245,10 @@ public class GroupeService {
 
     //##### PARTIE GESTION Mouvements ######
 
-    public List<Mouvement> getAllMouvementsByGroupe(Long idGroupe) {
+    public List<MouvementDTO> getAllMouvementsByGroupe(Long idGroupe) {
         Groupe groupe = groupeRepository.findById(idGroupe)
-                .orElseThrow(() -> new RuntimeException("Groupe not found"));
-        return groupe.getMouvements();
+            .orElseThrow(() -> new RuntimeException("Groupe not found"));
+        return groupe.getMouvements().stream().map(this::convertMouvementToDTO).collect(Collectors.toList());
     }
 
     @Transactional
@@ -207,7 +277,19 @@ public class GroupeService {
     @Transactional
     public MouvementDTO createMouvement(MouvementDTO mouvementDTO, Long idGroupe) {
         Groupe groupe = groupeRepository.findById(idGroupe)
-                .orElseThrow(() -> new RuntimeException("Groupe not found"));
+            .orElseThrow(() -> new RuntimeException("Groupe not found"));
+        // Vérification d'unicité : même nom, prénom et dates dans le même groupe
+        boolean existe = groupe.getMouvements().stream().anyMatch(m ->
+            m.getNom().equalsIgnoreCase(mouvementDTO.getNom()) &&
+            m.getPrenom().equalsIgnoreCase(mouvementDTO.getPrenom()) &&
+            ((m.getDateArrivee() != null && m.getDateArrivee().equals(mouvementDTO.getDateArrivee())) ||
+             (m.getDateArrivee() == null && mouvementDTO.getDateArrivee() == null)) &&
+            ((m.getDateDepart() != null && m.getDateDepart().equals(mouvementDTO.getDateDepart())) ||
+             (m.getDateDepart() == null && mouvementDTO.getDateDepart() == null))
+        );
+        if (existe) {
+            throw new RuntimeException("Ce mouvement existe déjà dans ce groupe");
+        }
         Mouvement mouvement = new Mouvement();
         mouvement.setDateArrivee(mouvementDTO.getDateArrivee());
         mouvement.setDateDepart(mouvementDTO.getDateDepart());
@@ -224,6 +306,7 @@ public class GroupeService {
         return createdMouvementDTO;
     }
 
+    @Transactional
     public void deleteMouvement(Long idMouvement, Long idGroupe) {
         Groupe groupe = groupeRepository.findById(idGroupe)
                 .orElseThrow(() -> new RuntimeException("Groupe not found"));
@@ -248,10 +331,10 @@ public class GroupeService {
         return etats;
     }
 // ##### PARTIE GESTION PRET ######
-public List<Pret> getAllPretsByGroupe(Long idGroupe) {
-    Groupe groupe = groupeRepository.findById(idGroupe)
+public List<PretDTO> getAllPretsByGroupe(Long idGroupe) {
+        Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
-    return groupe.getPrets();
+        return groupe.getPrets().stream().map(this::convertPretToDTO).collect(Collectors.toList());
 }
 
 @Transactional
@@ -308,7 +391,7 @@ public PretDTO createPret(PretDTO pretDTO, Long idGroupe) {
     createdPretDTO.setDateFin(pret.getDateFin());
     return createdPretDTO;
 }
-
+@Transactional
 public void deletePret(Long idPret, Long idGroupe) {
     Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
@@ -334,10 +417,10 @@ public List<EtatPret> getAllEtatsPret() {
 }
 
 // ##### PARTIE GESTION ACHAT ######
-public List<Achat> getAllAchatsByGroupe(Long idGroupe) {
-    Groupe groupe = groupeRepository.findById(idGroupe)
+public List<AchatDTO> getAllAchatsByGroupe(Long idGroupe) {
+        Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
-    return groupe.getAchats();
+        return groupe.getAchats().stream().map(this::convertAchatToDTO).collect(Collectors.toList());
 }
 
 @Transactional
@@ -369,6 +452,16 @@ public AchatDTO updateAchat(AchatDTO achatDTO, Long idGroupe) {
 public AchatDTO createAchat(AchatDTO achatDTO, Long idGroupe) {
     Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
+    // Vérification d'unicité : même nom matériel, marque et personne dans le même groupe
+    boolean existe = groupe.getAchats().stream().anyMatch(a ->
+        a.getNomMateriel().equalsIgnoreCase(achatDTO.getNomMateriel()) &&
+        a.getMarqueMateriel().equalsIgnoreCase(achatDTO.getMarqueMateriel()) &&
+        a.getNomPersonne().equalsIgnoreCase(achatDTO.getNomPersonne()) &&
+        a.getPrenomPersonne().equalsIgnoreCase(achatDTO.getPrenomPersonne())
+    );
+    if (existe) {
+        throw new RuntimeException("Cet achat existe déjà dans ce groupe");
+    }
     Achat achat = new Achat();
     achat.setNomMateriel(achatDTO.getNomMateriel());
     achat.setMarqueMateriel(achatDTO.getMarqueMateriel());
@@ -386,7 +479,7 @@ public AchatDTO createAchat(AchatDTO achatDTO, Long idGroupe) {
     createdAchatDTO.setQuantite(achat.getQuantite());
     return createdAchatDTO;
 }
-
+@Transactional
 public void deleteAchat(Long idAchat, Long idGroupe) {
     Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
