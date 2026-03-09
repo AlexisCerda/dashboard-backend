@@ -19,7 +19,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.dto.EtatMouvementDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 
 @RestController
-@RequestMapping("/api/mouvement")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class MouvementController {
     private final GroupeService groupeService;
@@ -28,15 +28,15 @@ public class MouvementController {
         this.groupeService = groupeService;
     }
 
-    @GetMapping("/getall/{idgroupe}")
-    public ResponseEntity<?> GetAllMouvementGroupe(@PathVariable Long idgroupe) {
+    @GetMapping("/groupes/{idGroupe}/mouvements")
+    public ResponseEntity<?> GetAllMouvementGroupe(@PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.getAllMouvementsByGroupe(idgroupe)); // La méthode service retourne maintenant des DTO
+            return ResponseEntity.ok(groupeService.getAllMouvementsByGroupe(idGroupe)); // La méthode service retourne maintenant des DTO
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-        @PatchMapping("/updateEtat/{id}")
+        @PatchMapping("/mouvements/{id}/etat")
         public ResponseEntity<?> updateEtatMouvement(@PathVariable Long id, @RequestBody EtatMouvementDTO dto){
             try {
                 Mouvement mouvement = groupeService.getMouvementById(id);
@@ -47,45 +47,45 @@ public class MouvementController {
             }
         }
 
-    @PutMapping("/update/{idgroupe}")
-    public ResponseEntity<?> UpdateMouvement(@RequestBody MouvementDTO mouvement, @PathVariable Long idgroupe) {
+    @PutMapping("/groupes/{idGroupe}/mouvements/{idMouvement}")
+    public ResponseEntity<?> UpdateMouvement(@RequestBody MouvementDTO mouvement, @PathVariable Long idGroupe) {
         try {
             
-            return ResponseEntity.ok(groupeService.updateMouvement(mouvement, idgroupe));
+            return ResponseEntity.ok(groupeService.updateMouvement(mouvement, idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @PostMapping("/create/{idgroupe}")
-    public ResponseEntity<?> CreateMouvement(@RequestBody MouvementDTO mouvement, @PathVariable Long idgroupe) {
+    @PostMapping("/groupes/{idGroupe}/mouvements")
+    public ResponseEntity<?> CreateMouvement(@RequestBody MouvementDTO mouvement, @PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.createMouvement(mouvement, idgroupe));
+            return ResponseEntity.ok(groupeService.createMouvement(mouvement, idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/delete/{idmouvement}/{idgroupe}")
-    public ResponseEntity<?> DeleteMouvement(@PathVariable Long idmouvement, @PathVariable Long idgroupe) {
+    @DeleteMapping("/groupes/{idGroupe}/mouvements/{idMouvement}")
+    public ResponseEntity<?> DeleteMouvement(@PathVariable Long idMouvement, @PathVariable Long idGroupe) {
         try {
-            groupeService.deleteMouvement(idmouvement, idgroupe);
+            groupeService.deleteMouvement(idMouvement, idGroupe);
             return ResponseEntity.ok("Mouvement deleted successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @GetMapping("/getetat/{idmouvement}")
-    public ResponseEntity<?> GetEtatMouvement(@PathVariable Long idmouvement) {
+    @GetMapping("/mouvements/{idMouvement}/etat")
+    public ResponseEntity<?> GetEtatMouvement(@PathVariable Long idMouvement) {
         try {
-            return ResponseEntity.ok(groupeService.getEtatsMouvement(idmouvement));
+            return ResponseEntity.ok(groupeService.getEtatsMouvement(idMouvement));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @GetMapping("/getetats")
+    @GetMapping("/mouvements/etats")
     public ResponseEntity<?> GetEtatsMouvement() {
         try {
             return ResponseEntity.ok(groupeService.getAllEtatsMouvement());

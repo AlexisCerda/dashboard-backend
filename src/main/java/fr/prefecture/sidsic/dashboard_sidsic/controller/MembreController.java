@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 
 @RestController
-@RequestMapping("api/membre")
+@RequestMapping("/api/membres")
 @CrossOrigin(origins ="*")
 public class MembreController {
     private final MembreService membreService;
@@ -35,7 +35,7 @@ public class MembreController {
     }
 
     
-    @GetMapping("/getall")
+    @GetMapping
     public ResponseEntity<?> GetAll() {
         try {
             return ResponseEntity.ok(membreService.recupererToutLesMembres());
@@ -44,7 +44,7 @@ public class MembreController {
         }
     }
 
-    @GetMapping("/getid{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> GetById(@PathVariable Long id ){
         try {
             return ResponseEntity.ok(membreService.GetMembreDTO(membreService.getMembreById(id)));
@@ -53,7 +53,7 @@ public class MembreController {
         }
     }
 
-    @PutMapping("/update")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateMembreById(@RequestBody MembreUpdateDTO membre ){
         try {
             Optional<Membre> m = membreService.getMembreById(membre.getId());
@@ -76,7 +76,7 @@ public class MembreController {
         }
     }
 
-    @DeleteMapping("/delete{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMemberById(@PathVariable Long id){
         try {
             Membre m = membreService.GetMembre(membreService.getMembreById(id));
@@ -88,7 +88,7 @@ public class MembreController {
         }
     }
 
-    @PostMapping("/create {mdp}")
+    @PostMapping("/{mdp}")
     public ResponseEntity<?> createMembre(@RequestBody MembreDTO membre, @PathVariable String mdp) {
         try {
             return ResponseEntity.ok((membreService.creerUnNouveauMembre(membre,mdp)));
@@ -98,10 +98,19 @@ public class MembreController {
         }
     }
 
-    @PatchMapping("/updatecurrentgroupe/{idgroupe}/{idmembre}")
-    public ResponseEntity<?> updateCurrentGroupe(@PathVariable Long idmembre, @PathVariable Long idgroupe) {
+    @PatchMapping("/{idMembre}/groupe-actuel/{idGroupe}")
+    public ResponseEntity<?> updateCurrentGroupe(@PathVariable Long idMembre, @PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.updateCurrentGroupe(idmembre, idgroupe)); // La méthode service retourne maintenant un DTO
+            return ResponseEntity.ok(groupeService.updateCurrentGroupe(idMembre, idGroupe));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{idMembre}/groupe-actuel")
+    public ResponseEntity<?> getCurrentGroupe(@PathVariable Long idMembre) {
+        try {
+            return ResponseEntity.ok(groupeService.getCurrentGroupe(idMembre));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }

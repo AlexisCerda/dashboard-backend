@@ -19,7 +19,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.entity.Pret;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 
 @RestController
-@RequestMapping("/api/pret")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class PretController {
     private final GroupeService groupeService;
@@ -28,15 +28,15 @@ public class PretController {
         this.groupeService = groupeService;
     }
 
-    @GetMapping("/getall/{idgroupe}")
-    public ResponseEntity<?> getAllPretGroupe(@PathVariable Long idgroupe) {
+    @GetMapping("/groupes/{idGroupe}/prets")
+    public ResponseEntity<?> getAllPretGroupe(@PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.getAllPretsByGroupe(idgroupe)); // La méthode service retourne maintenant des DTO
+            return ResponseEntity.ok(groupeService.getAllPretsByGroupe(idGroupe)); // La méthode service retourne maintenant des DTO
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-        @PatchMapping("/updateEtat/{id}")
+        @PatchMapping("/prets/{id}/etat")
         public ResponseEntity<?> updateEtatPret(@PathVariable Long id, @RequestBody EtatPretDTO dto){
             try {
                 Pret pret = groupeService.getPretById(id);
@@ -47,44 +47,44 @@ public class PretController {
             }
         }
 
-    @PutMapping("/update/{idgroupe}")
-    public ResponseEntity<?> updatePret(@RequestBody PretDTO pret, @PathVariable Long idgroupe) {
+    @PutMapping("/groupes/{idGroupe}/prets/{idPret}")
+    public ResponseEntity<?> updatePret(@RequestBody PretDTO pret, @PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.updatePret(pret, idgroupe));
+            return ResponseEntity.ok(groupeService.updatePret(pret, idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @PostMapping("/create/{idgroupe}")
-    public ResponseEntity<?> createPret(@RequestBody PretDTO pret, @PathVariable Long idgroupe) {
+    @PostMapping("/groupes/{idGroupe}/prets")
+    public ResponseEntity<?> createPret(@RequestBody PretDTO pret, @PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.createPret(pret, idgroupe));
+            return ResponseEntity.ok(groupeService.createPret(pret, idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/delete/{idpret}/{idgroupe}")
-    public ResponseEntity<?> deletePret(@PathVariable Long idpret, @PathVariable Long idgroupe) {
+    @DeleteMapping("/groupes/{idGroupe}/prets/{idPret}")
+    public ResponseEntity<?> deletePret(@PathVariable Long idPret, @PathVariable Long idGroupe) {
         try {
-            groupeService.deletePret(idpret, idgroupe);
+            groupeService.deletePret(idPret, idGroupe);
             return ResponseEntity.ok("Pret deleted successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @GetMapping("/getetat/{idpret}")
-    public ResponseEntity<?> getEtatPret(@PathVariable Long idpret) {
+    @GetMapping("/prets/{idPret}/etat")
+    public ResponseEntity<?> getEtatPret(@PathVariable Long idPret) {
         try {
-            return ResponseEntity.ok(groupeService.getEtatsPret(idpret));
+            return ResponseEntity.ok(groupeService.getEtatsPret(idPret));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @GetMapping("/getetats")
+    @GetMapping("/prets/etats")
     public ResponseEntity<?> getEtatsPret() {
         try {
             return ResponseEntity.ok(groupeService.getAllEtatsPret());

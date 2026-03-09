@@ -16,7 +16,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.dto.GroupeDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 
 @RestController
-@RequestMapping("/api/groupe")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class GroupeController {
     private final GroupeService groupeService;
@@ -25,7 +25,7 @@ public class GroupeController {
         this.groupeService = groupeService;
     }
 
-    @GetMapping("/getallbymembre/{id}")
+    @GetMapping("/membres/{id}/groupes")
     public ResponseEntity<?> GetAllByMembre(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(groupeService.getAllByMembre(id));
@@ -34,7 +34,7 @@ public class GroupeController {
         }
     }
 
-    @GetMapping("/getallbymembreadmin/{id}")
+    @GetMapping("/membres/{id}/groupes/admin")
     public ResponseEntity<?> GetAllByMembreAdmin(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(groupeService.getAllByMembreAdmin(id));
@@ -43,81 +43,81 @@ public class GroupeController {
         }
     }
 
-    @GetMapping("/getallmembre/{idgroupe}")
-    public ResponseEntity<?> GetAllMembreGroupe(@PathVariable Long idgroupe) {
+    @GetMapping("/groupes/{idGroupe}/membres")
+    public ResponseEntity<?> GetAllMembreGroupe(@PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.getAllMembre(idgroupe));
+            return ResponseEntity.ok(groupeService.getAllMembre(idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @GetMapping("/getallmembreadmin/{idgroupe}")
-    public ResponseEntity<?> GetAllMembreAdmin(@PathVariable Long idgroupe) {
+    @GetMapping("/groupes/{idGroupe}/membres/admin")
+    public ResponseEntity<?> GetAllMembreAdmin(@PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.getAllAdmin(idgroupe));
+            return ResponseEntity.ok(groupeService.getAllAdmin(idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/deletemembre/{idmembre}/{idgroupe}")
-    public ResponseEntity<?> DeleteMembre(@PathVariable Long idmembre, @PathVariable Long idgroupe) {
+    @DeleteMapping("/groupes/{idGroupe}/membres/{idMembre}")
+    public ResponseEntity<?> DeleteMembre(@PathVariable Long idMembre, @PathVariable Long idGroupe) {
         try {
-            groupeService.deleteMembre(idmembre, idgroupe);
+            groupeService.deleteMembre(idMembre, idGroupe);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @PostMapping("/create/{idmembre}")
-    public ResponseEntity<?> CreateGroupe(@PathVariable Long idmembre, @RequestBody GroupeDTO groupeDTO) {
+    @PostMapping("/membres/{idMembre}/groupes")
+    public ResponseEntity<?> CreateGroupe(@PathVariable Long idMembre, @RequestBody GroupeDTO groupeDTO) {
         try {
-            return ResponseEntity.ok(groupeService.createGroupe(idmembre, groupeDTO));
+            return ResponseEntity.ok(groupeService.createGroupe(idMembre, groupeDTO));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @PostMapping("/join/{idMembreActuel}/{idmembre}/{idgroupe}")
-    public ResponseEntity<?> addMembreToGroupe(@PathVariable Long idmembre, @PathVariable Long idgroupe, @PathVariable Long idMembreActuel   ) {
+    @PostMapping("/groupes/{idGroupe}/membres/{idMembre}/added-by/{idMembreActuel}")
+    public ResponseEntity<?> addMembreToGroupe(@PathVariable Long idMembre, @PathVariable Long idGroupe, @PathVariable Long idMembreActuel   ) {
         try {
-            return ResponseEntity.ok(groupeService.addMembreToGroupe(idmembre, idgroupe, idMembreActuel));
+            return ResponseEntity.ok(groupeService.addMembreToGroupe(idMembre, idGroupe, idMembreActuel));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @PatchMapping("/updatemembretoadmin/{idmembreActuel}/{idgroupe}/{idmembre}")
-    public ResponseEntity<?> updateMembreToAdmin(@PathVariable Long idmembreActuel, @PathVariable Long idgroupe, @PathVariable Long idmembre) {
+    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/promote/by/{idMembreActuel}")
+    public ResponseEntity<?> updateMembreToAdmin(@PathVariable Long idMembreActuel, @PathVariable Long idGroupe, @PathVariable Long idMembre) {
         try {
-            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idmembre, idgroupe, true, idmembreActuel));
+            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idMembre, idGroupe, true, idMembreActuel));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-    @PatchMapping("/updateadmintomembre/{idmembreActuel}/{idgroupe}/{idmembre}")
-    public ResponseEntity<?> updateAdminToMembre(@PathVariable Long idmembreActuel, @PathVariable Long idgroupe, @PathVariable Long idmembre) {
+    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/demote/by/{idMembreActuel}")
+    public ResponseEntity<?> updateAdminToMembre(@PathVariable Long idMembreActuel, @PathVariable Long idGroupe, @PathVariable Long idMembre) {
         try {
-            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idmembre, idgroupe, false, idmembreActuel));
+            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idMembre, idGroupe, false, idMembreActuel));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-    @PatchMapping("/updatemembretoadminurgent/{idgroupe}/{idmembre}")
-    public ResponseEntity<?> updateMembreToAdminUrgent(@PathVariable Long idgroupe, @PathVariable Long idmembre) {
+    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/promote/urgent")
+    public ResponseEntity<?> updateMembreToAdminUrgent(@PathVariable Long idGroupe, @PathVariable Long idMembre) {
         try {
-            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idmembre, idgroupe, true, null));
+            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idMembre, idGroupe, true, null));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/delete/{idgroupe}")
-    public ResponseEntity<?> deleteGroupe(@PathVariable Long idgroupe) {
+    @DeleteMapping("/groupes/{idGroupe}")
+    public ResponseEntity<?> deleteGroupe(@PathVariable Long idGroupe) {
         try {
-            groupeService.deleteGroupe(idgroupe);
+            groupeService.deleteGroupe(idGroupe);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

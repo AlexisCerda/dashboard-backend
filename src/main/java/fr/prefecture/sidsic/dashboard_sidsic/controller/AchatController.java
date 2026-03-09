@@ -20,7 +20,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 
 
 @RestController
-@RequestMapping("/api/achat")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class AchatController {
 	private final GroupeService groupeService;
@@ -29,24 +29,24 @@ public class AchatController {
 		this.groupeService = groupeService;
 	}
 
-	@GetMapping("/getall/{idgroupe}")
-	public ResponseEntity<?> getAllAchatGroupe(@PathVariable Long idgroupe) {
+	@GetMapping("/groupes/{idGroupe}/achats")
+	public ResponseEntity<?> getAllAchatGroupe(@PathVariable Long idGroupe) {
 		try {
-			return ResponseEntity.ok(groupeService.getAllAchatsByGroupe(idgroupe)); // La méthode service retourne maintenant des DTO
+			return ResponseEntity.ok(groupeService.getAllAchatsByGroupe(idGroupe)); // La méthode service retourne maintenant des DTO
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
 	}
 
-	@PutMapping("/update/{idgroupe}")
-	public ResponseEntity<?> updateAchat(@RequestBody AchatDTO achat, @PathVariable Long idgroupe) {
+	@PutMapping("/groupes/{idGroupe}/achats/{idAchat}")
+	public ResponseEntity<?> updateAchat(@RequestBody AchatDTO achat, @PathVariable Long idGroupe) {
 		try {
-			return ResponseEntity.ok(groupeService.updateAchat(achat, idgroupe));
+			return ResponseEntity.ok(groupeService.updateAchat(achat, idGroupe));
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
 	}
-	@PatchMapping("/updateEtat/{id}")
+	@PatchMapping("/achats/{id}/etat")
 	public ResponseEntity<?> updateEtatAchat(@PathVariable Long id, @RequestBody EtatAchatDTO dto){
 		try {
 			Achat achat = groupeService.getAchatById(id);
@@ -57,35 +57,35 @@ public class AchatController {
 		}
 	}
 
-	@PostMapping("/create/{idgroupe}")
-	public ResponseEntity<?> createAchat(@RequestBody AchatDTO achat, @PathVariable Long idgroupe) {
+	@PostMapping("/groupes/{idGroupe}/achats")
+	public ResponseEntity<?> createAchat(@RequestBody AchatDTO achat, @PathVariable Long idGroupe) {
 		try {
-			return ResponseEntity.ok(groupeService.createAchat(achat, idgroupe));
+			return ResponseEntity.ok(groupeService.createAchat(achat, idGroupe));
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
 	}
 
-	@DeleteMapping("/delete/{idachat}/{idgroupe}")
-	public ResponseEntity<?> deleteAchat(@PathVariable Long idachat, @PathVariable Long idgroupe) {
+	@DeleteMapping("/groupes/{idGroupe}/achats/{idAchat}")
+	public ResponseEntity<?> deleteAchat(@PathVariable Long idAchat, @PathVariable Long idGroupe) {
 		try {
-			groupeService.deleteAchat(idachat, idgroupe);
+			groupeService.deleteAchat(idAchat, idGroupe);
 			return ResponseEntity.ok("Achat deleted successfully");
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
 	}
 
-	@GetMapping("/getetat/{idachat}")
-	public ResponseEntity<?> getEtatAchat(@PathVariable Long idachat) {
+	@GetMapping("/achats/{idAchat}/etat")
+	public ResponseEntity<?> getEtatAchat(@PathVariable Long idAchat) {
 		try {
-			return ResponseEntity.ok(groupeService.getEtatsAchat(idachat));
+			return ResponseEntity.ok(groupeService.getEtatsAchat(idAchat));
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
 	}
 
-	@GetMapping("/getetats")
+	@GetMapping("/achats/etats")
 	public ResponseEntity<?> getEtatsAchat() {
 		try {
 			return ResponseEntity.ok(groupeService.getAllEtatsAchat());
