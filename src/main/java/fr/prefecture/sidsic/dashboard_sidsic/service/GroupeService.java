@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.GroupeDTO;
@@ -40,6 +42,9 @@ public class GroupeService {
     private final PretRepository pretRepository;
     private final AchatRepository achatRepository;
     private final MembreService membreService;
+    
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public GroupeService(GroupeRepository groupeRepository, MembreRepository membreRepository,
             MembreGroupeRepository membreGroupeRepository, MouvementRepository mouvementRepository,
@@ -171,6 +176,9 @@ public class GroupeService {
         Groupe groupe = groupeRepository.findById(idGroupe)
                 .orElseThrow(() -> new RuntimeException("Groupe not found"));
         membreGroupeRepository.deleteByMembreAndGroupe(membre, groupe);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MEMBRES");
     }
 
     @Transactional
@@ -211,6 +219,10 @@ public class GroupeService {
         membreGroupe.setGroupe(groupe);
         membreGroupe.setIsAdmin(0);
         membreGroupeRepository.save(membreGroupe);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MEMBRES");
+        
         ArrayList<MembreDTO> membres = new ArrayList<>();
         for (MembreDTO membreadd : this.getAllMembre(idGroupe)) {
             membres.add(membreadd);
@@ -234,6 +246,10 @@ public class GroupeService {
                 .orElseThrow(() -> new RuntimeException("MembreGroupe not found"));
         membreGroupe.setIsAdmin(isAdmin ? 1 : 0);
         membreGroupeRepository.save(membreGroupe);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MEMBRES");
+        
         List<MembreDTO> membres = new ArrayList<>();
         for (MembreDTO membreadd : this.getAllMembre(idGroupe)) {
             membres.add(membreadd);
@@ -276,6 +292,10 @@ public class GroupeService {
         mouvement.setNom(mouvementDTO.getNom());
         mouvement.setPrenom(mouvementDTO.getPrenom());
         groupeRepository.save(groupe);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MOUVEMENTS");
+        
         MouvementDTO updatedMouvementDTO = new MouvementDTO();
         updatedMouvementDTO.setId(mouvement.getId());
         updatedMouvementDTO.setDateArrivee(mouvement.getDateArrivee());
@@ -308,6 +328,10 @@ public class GroupeService {
         mouvement.setPrenom(mouvementDTO.getPrenom());
         mouvement.setGroupe(groupe);
         mouvementRepository.save(mouvement);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MOUVEMENTS");
+        
         MouvementDTO createdMouvementDTO = new MouvementDTO();
         createdMouvementDTO.setId(mouvement.getId());
         createdMouvementDTO.setDateArrivee(mouvement.getDateArrivee());
@@ -327,6 +351,9 @@ public class GroupeService {
             throw new RuntimeException("Ce mouvement n'appartient pas à ce groupe");
         }
         mouvementRepository.delete(mouvement);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MOUVEMENTS");
     }
 
     public EtatMouvement getEtatsMouvement(Long idMouvement) {
@@ -367,6 +394,10 @@ public class GroupeService {
         pret.setDateDebut(pretDTO.getDateDebut());
         pret.setDateFin(pretDTO.getDateFin());
         pretRepository.save(pret);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_PRETS");
+        
         PretDTO updatedPretDTO = new PretDTO();
         updatedPretDTO.setId(pret.getId());
         updatedPretDTO.setNomMateriel(pret.getNomMateriel());
@@ -393,6 +424,10 @@ public class GroupeService {
         pret.setDateFin(pretDTO.getDateFin());
         pret.setGroupe(groupe);
         pretRepository.save(pret);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_PRETS");
+        
         PretDTO createdPretDTO = new PretDTO();
         createdPretDTO.setId(pret.getId());
         createdPretDTO.setNomMateriel(pret.getNomMateriel());
@@ -415,6 +450,9 @@ public class GroupeService {
             throw new RuntimeException("Ce pret n'appartient pas à ce groupe");
         }
         pretRepository.delete(pret);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_PRETS");
     }
 
     public EtatPret getEtatsPret(Long idPret) {
@@ -453,6 +491,10 @@ public class GroupeService {
         achat.setPrenomPersonne(achatDTO.getPrenomPersonne());
         achat.setQuantite(achatDTO.getQuantite());
         achatRepository.save(achat);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_ACHATS");
+        
         AchatDTO updatedAchatDTO = new AchatDTO();
         updatedAchatDTO.setId(achat.getId());
         updatedAchatDTO.setNomMateriel(achat.getNomMateriel());
@@ -486,6 +528,10 @@ public class GroupeService {
         achat.setGroupe(groupe);
         achat.setEtat(EtatAchat.A_ACHETER);
         achatRepository.save(achat);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_ACHATS");
+        
         AchatDTO createdAchatDTO = new AchatDTO();
         createdAchatDTO.setId(achat.getId());
         createdAchatDTO.setNomMateriel(achat.getNomMateriel());
@@ -506,6 +552,9 @@ public class GroupeService {
             throw new RuntimeException("Cet achat n'appartient pas à ce groupe");
         }
         achatRepository.delete(achat);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_ACHATS");
     }
 
     public EtatAchat getEtatsAchat(Long idAchat) {
@@ -546,6 +595,10 @@ public class GroupeService {
                 .orElseThrow(() -> new RuntimeException("Mouvement not found"));
         mouvement.setEtat(dto.getEtat());
         mouvementRepository.save(mouvement);
+        
+        String frequenceRadio = "/topic/groupe/" + mouvement.getGroupe().getId();
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MOUVEMENTS");
+        
         return convertMouvementToDTO(mouvement);
     }
 
@@ -555,6 +608,10 @@ public class GroupeService {
                 .orElseThrow(() -> new RuntimeException("Achat not found"));
         achat.setEtat(dto.getEtat());
         achatRepository.save(achat);
+        
+        String frequenceRadio = "/topic/groupe/" + achat.getGroupe().getId();
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_ACHATS");
+        
         return convertAchatToDTO(achat);
     }
 
@@ -564,6 +621,10 @@ public class GroupeService {
                 .orElseThrow(() -> new RuntimeException("Pret not found"));
         pret.setEtat(dto.getEtat());
         pretRepository.save(pret);
+        
+        String frequenceRadio = "/topic/groupe/" + pret.getGroupe().getId();
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_PRETS");
+        
         return convertPretToDTO(pret);
     }
 }

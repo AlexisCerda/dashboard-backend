@@ -53,7 +53,7 @@ public class MembreController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/")
     public ResponseEntity<?> updateMembreById(@RequestBody MembreUpdateDTO membre ){
         try {
             Optional<Membre> m = membreService.getMembreById(membre.getId());
@@ -61,11 +61,16 @@ public class MembreController {
                 if (!membre.getEmail().contains("@")) {
                     throw new RuntimeException("Veuillez entrer une adresse mail valide");
                 }
+                System.out.println(membre.getEmail().equals(m.get().getEmail()));
+                System.out.println(membreService.getMembreByEmail(membre.getEmail()).isPresent());
+                if (membreService.getMembreByEmail(membre.getEmail()).isPresent() && !(membre.getEmail().equals(m.get().getEmail()))) {
+                    throw new RuntimeException("L'Email est deja pris !");
+                }
                 Membre membreExist = m.get();
                 membreExist.setPrenom(membre.getPrenom());
                 membreExist.setNom(membre.getNom());
                 membreExist.setEmail(membre.getEmail());
-                membreExist.setPassword(membreService.Encrypted(membre.getPwd()));
+                membreExist.setPassword(membreExist.getPassword());
                 membreService.SaveBD(membreExist);
                 return ResponseEntity.ok(membreService.GetMembreDTO(membreExist));
             }else{
@@ -111,6 +116,16 @@ public class MembreController {
     public ResponseEntity<?> getCurrentGroupe(@PathVariable Long idMembre) {
         try {
             return ResponseEntity.ok(groupeService.getCurrentGroupe(idMembre));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/{idMembre}/pwd")
+    public ResponseEntity<?> updatePwdbyIdMembre(@PathVariable Long idMembre, @RequestBody String Pwd ) {
+        try {
+            membreService.updatePwdByIdMembre(idMembre, Pwd);
+            return ResponseEntity.ok(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }

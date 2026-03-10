@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
@@ -21,6 +23,9 @@ public class MembreService {
     private final MembreRepository  membreRepository;
     private final TacheRepository tacheRepository;
     //private final BCryptPasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository) {
         this.membreRepository = membreRepository;
@@ -118,6 +123,13 @@ public class MembreService {
         return membresDTO;
     }
 
+    @Transactional
+    public void updatePwdByIdMembre(Long IdMembre, String Pwd){
+        Membre membre = membreRepository.findById(IdMembre).orElseThrow(() -> new RuntimeException("Membre not found"));
+        membre.setPassword(Encrypted(Pwd));
+        membreRepository.save(membre);
+    }
+
 
     //##### PARTIE TACHE ######
 
@@ -131,6 +143,11 @@ public class MembreService {
             membre.getTaches().add(tache);
             membreRepository.save(membre);
         }
+        
+        Long idGroupe = tache.getGroupe().getId();
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+        
         return getAllMembresByTache(idTache);
     }
 
@@ -144,6 +161,11 @@ public class MembreService {
             membre.getTaches().remove(tache);
             membreRepository.save(membre);
         }
+        
+        Long idGroupe = tache.getGroupe().getId();
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+        
         return getAllMembresByTache(idTache);
     }
 
@@ -155,19 +177,30 @@ public class MembreService {
         tache.setDescription(tacheDTO.getDescription());
         tache.setDateDebut(tacheDTO.getDateDebut());
         tache.setDateLimite(tacheDTO.getDateLimite());
+        
+        tacheRepository.save(tache);
+        
+        Long idGroupe = tache.getGroupe().getId();
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
 
-        return this.convertTacheToDTO(tacheRepository.save(tache));
+        return this.convertTacheToDTO(tache);
     }
     @Transactional
     public void deleteTache(Long id) {
         Tache tache = tacheRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Tache not found"));
+        Long idGroupe = tache.getGroupe().getId();
+        
         for (Membre membre : new ArrayList<>(tache.getMembres())) {
             membre.getTaches().remove(tache);
         }
         tache.getMembres().clear();
         tacheRepository.save(tache);
         tacheRepository.delete(tache);
+        
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
     }
 
     public TacheDTO addTache(TacheDTO tacheDTO, Groupe groupe) {
@@ -186,6 +219,10 @@ public class MembreService {
         tache.setDateLimite(tacheDTO.getDateLimite());
         tache.setEtat(EtatTache.A_FAIRE);
         tacheRepository.save(tache);
+        
+        Long idGroupe = groupe.getId();
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
 
         return tacheDTO;
     }
@@ -202,7 +239,13 @@ public class MembreService {
         existingTache.setDescription(tache.getDescription());
         existingTache.setDateDebut(tache.getDateDebut());
         existingTache.setDateLimite(tache.getDateLimite());
-        return tacheRepository.save(existingTache);
+        Tache savedTache = tacheRepository.save(existingTache);
+        
+        Long idGroupe = savedTache.getGroupe().getId();
+        String frequenceRadio = "/topic/groupe/" + idGroupe;
+        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+        
+        return savedTache;
     }
     public List<TacheDTO> getTacheDTO(Membre membre) {
         List<Tache> taches = membre.getTaches();
