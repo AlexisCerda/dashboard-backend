@@ -179,6 +179,12 @@ public class GroupeService {
 
         long nbMembresRestants = membreGroupeRepository.findByGroupeId(idGroupe).size();
         if (nbMembresRestants == 0) {
+            if (groupe.getMembres_current() != null && !groupe.getMembres_current().isEmpty()) {
+                for (Membre membreCourant : groupe.getMembres_current()) {
+                    membreCourant.setCurrent_groupe(null);
+                }
+                membreRepository.saveAll(groupe.getMembres_current());
+            }
             groupeRepository.delete(groupe);
             return;
         }
