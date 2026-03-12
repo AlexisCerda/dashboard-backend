@@ -14,6 +14,8 @@ import fr.prefecture.sidsic.dashboard_sidsic.entity.Groupe;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Tache;
 import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatTache;
+import fr.prefecture.sidsic.dashboard_sidsic.repository.GroupeRepository;
+import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreGroupeRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.TacheRepository;
 import jakarta.transaction.Transactional;
@@ -22,14 +24,19 @@ import jakarta.transaction.Transactional;
 public class MembreService {
     private final MembreRepository  membreRepository;
     private final TacheRepository tacheRepository;
+    private final GroupeRepository groupeRepository;
+    private final MembreGroupeRepository membreGroupeRepository;
     //private final BCryptPasswordEncoder passwordEncoder;
     
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository) {
+    public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository,
+            GroupeRepository groupeRepository, MembreGroupeRepository membreGroupeRepository) {
         this.membreRepository = membreRepository;
         this.tacheRepository = tacheRepository;
+        this.groupeRepository = groupeRepository;
+        this.membreGroupeRepository = membreGroupeRepository;
         //this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -109,7 +116,16 @@ public class MembreService {
     }
     @Transactional
     public void DelMembre(Membre m){
+        List<Long> idGroupes = m.getGroupes().stream()
+                .map(mg -> mg.getGroupe().getId())
+                .collect(java.util.stream.Collectors.toList());
         membreRepository.delete(m);
+        for (Long idGroupe : idGroupes) {
+            long nbMembresRestants = membreGroupeRepository.countByGroupeId(idGroupe);
+            if (nbMembresRestants == 0) {
+                groupeRepository.findById(idGroupe).ifPresent(groupeRepository::delete);
+            }
+        }
     }
 
     public List<MembreDTO> getAllMembresByTache(Long idTache){

@@ -176,7 +176,13 @@ public class GroupeService {
         Groupe groupe = groupeRepository.findById(idGroupe)
                 .orElseThrow(() -> new RuntimeException("Groupe not found"));
         membreGroupeRepository.deleteByMembreAndGroupe(membre, groupe);
-        
+
+        long nbMembresRestants = membreGroupeRepository.findByGroupeId(idGroupe).size();
+        if (nbMembresRestants == 0) {
+            groupeRepository.delete(groupe);
+            return;
+        }
+
         String frequenceRadio = "/topic/groupe/" + idGroupe;
         messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MEMBRES");
     }
