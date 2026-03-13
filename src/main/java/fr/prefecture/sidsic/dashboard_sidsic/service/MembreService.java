@@ -1,11 +1,14 @@
 package fr.prefecture.sidsic.dashboard_sidsic.service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,274 +26,296 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class MembreService {
-    private final MembreRepository  membreRepository;
-    private final TacheRepository tacheRepository;
-    private final GroupeRepository groupeRepository;
-    private final MembreGroupeRepository membreGroupeRepository;
-    private final PasswordEncoder passwordEncoder;
-    
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+  private final MembreRepository membreRepository;
+  private final TacheRepository tacheRepository;
+  private final GroupeRepository groupeRepository;
+  private final MembreGroupeRepository membreGroupeRepository;
+  private final PasswordEncoder passwordEncoder;
 
-    public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository,
-            GroupeRepository groupeRepository, MembreGroupeRepository membreGroupeRepository,
-            PasswordEncoder passwordEncoder) {
-        this.membreRepository = membreRepository;
-        this.tacheRepository = tacheRepository;
-        this.groupeRepository = groupeRepository;
-        this.membreGroupeRepository = membreGroupeRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+  @Autowired
+  private SimpMessagingTemplate messagingTemplate;
 
-    public List<MembreDTO> recupererToutLesMembres() {
-        List<Membre> lMembre = membreRepository.findAll();
-        List<MembreDTO> lMembreDTO = new ArrayList<>();
-        for (Membre membre : lMembre) {
-            lMembreDTO.add(this.GetMembreDTO(membre));
-        }
-        return lMembreDTO;
-    }
+  public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository,
+      GroupeRepository groupeRepository, MembreGroupeRepository membreGroupeRepository,
+      PasswordEncoder passwordEncoder) {
+    this.membreRepository = membreRepository;
+    this.tacheRepository = tacheRepository;
+    this.groupeRepository = groupeRepository;
+    this.membreGroupeRepository = membreGroupeRepository;
+    this.passwordEncoder = passwordEncoder;
+  }
 
-    public Optional<Membre> getMembreById(Long id){
-        Optional<Membre> membre = membreRepository.findById(id);
-        return membre;
+  public List<MembreDTO> recupererToutLesMembres() {
+    List<Membre> lMembre = membreRepository.findAll();
+    List<MembreDTO> lMembreDTO = new ArrayList<>();
+    for (Membre membre : lMembre) {
+      lMembreDTO.add(this.GetMembreDTO(membre));
     }
-    public Optional<Membre> getMembreByEmail(String mail){
-        Optional<Membre> membre = membreRepository.findByEmail(mail);
-        return membre;
-    }
+    return lMembreDTO;
+  }
 
-    public MembreDTO creerUnNouveauMembre(MembreDTO nouveauMembre, String mdp)throws RuntimeException {
-        if (this.getMembreByEmail(nouveauMembre.getEmail()).isPresent()) {
-            throw new RuntimeException("L'Email est deja pris !");
-        }
-        if (!nouveauMembre.getEmail().contains("@")) {
-            throw new RuntimeException("Veuillez entrer une adresse mail valide");
-        }
-        if (mdp == null || mdp.isBlank()) {
-            throw new RuntimeException("Le mot de passe est obligatoire");
-        }
-        Membre m = new Membre();
-        String motDePasseCrypte = this.Encrypted(mdp);
-        m.setPassword(motDePasseCrypte);
-        m.setNom(nouveauMembre.getNom().toUpperCase());
-        m.setPrenom(nouveauMembre.getPrenom().toUpperCase());
-        m.setEmail(nouveauMembre.getEmail());
-        Membre saved = membreRepository.save(m);
-        return GetMembreDTO(saved);
-    }
+  public Optional<Membre> getMembreById(Long id) {
+    Optional<Membre> membre = membreRepository.findById(id);
+    return membre;
+  }
 
-    public Membre verifierConnexion(String email, String motDePasse) {
-        Membre leMembre = membreRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-        if (!passwordEncoder.matches(motDePasse, leMembre.getPassword())) {
-            throw new RuntimeException("Mot de passe incorrect");
-        }
-        return leMembre;
-    }
-    public String Encrypted(String Pwd){
-        return passwordEncoder.encode(Pwd);
-    }
+  public Optional<Membre> getMembreByEmail(String mail) {
+    Optional<Membre> membre = membreRepository.findByEmail(mail);
+    return membre;
+  }
 
-    public MembreDTO SaveBD(Membre m){
-        Membre saved = membreRepository.save(m);
-        return GetMembreDTO(saved);
+  public MembreDTO creerUnNouveauMembre(MembreDTO nouveauMembre, String mdp) throws RuntimeException {
+    if (this.getMembreByEmail(nouveauMembre.getEmail()).isPresent()) {
+      throw new RuntimeException("L'Email est deja pris !");
     }
+    if (!nouveauMembre.getEmail().contains("@")) {
+      throw new RuntimeException("Veuillez entrer une adresse mail valide");
+    }
+    if (mdp == null || mdp.isBlank()) {
+      throw new RuntimeException("Le mot de passe est obligatoire");
+    }
+    Membre m = new Membre();
+    String motDePasseCrypte = this.Encrypted(mdp);
+    m.setPassword(motDePasseCrypte);
+    m.setNom(nouveauMembre.getNom().toUpperCase());
+    m.setPrenom(nouveauMembre.getPrenom().toUpperCase());
+    m.setEmail(nouveauMembre.getEmail());
+    m.setLastConnection(LocalDate.now());
+    Membre saved = membreRepository.save(m);
+    return GetMembreDTO(saved);
+  }
 
-    public MembreDTO GetMembreDTO(Membre m){
-        MembreDTO membreReturn = new MembreDTO();
-        membreReturn.setPrenom(m.getPrenom());
-        membreReturn.setNom(m.getNom());
-        membreReturn.setEmail(m.getEmail());
-        membreReturn.setId(m.getId());
-        return membreReturn;
+  public Membre verifierConnexion(String email, String motDePasse) {
+    Membre leMembre = membreRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+    if (!passwordEncoder.matches(motDePasse, leMembre.getPassword())) {
+      throw new RuntimeException("Mot de passe incorrect");
     }
-    public MembreDTO GetMembreDTO(Optional<Membre> membre)throws RuntimeException{
-        if (!membre.isPresent()) {
-            throw new RuntimeException("Le membre n'existe pas");
-        }
-        Membre m = membre.get();
-        return GetMembreDTO(m);
-    }
-    public Membre GetMembre(Optional<Membre> membre)throws RuntimeException{
-        if (!membre.isPresent()) {
-            throw new RuntimeException("Le membre n'existe pas");
-        }
-        return membre.get();
-    }
-    @Transactional
-    public void DelMembre(Membre m){
-        List<Long> idGroupes = m.getGroupes().stream()
-                .map(mg -> mg.getGroupe().getId())
-                .collect(java.util.stream.Collectors.toList());
-        membreRepository.delete(m);
-        for (Long idGroupe : idGroupes) {
-            long nbMembresRestants = membreGroupeRepository.countByGroupeId(idGroupe);
-            if (nbMembresRestants == 0) {
-                groupeRepository.findById(idGroupe).ifPresent(groupeRepository::delete);
-            }
-        }
-    }
+    return leMembre;
+  }
 
-    public List<MembreDTO> getAllMembresByTache(Long idTache){
-        Tache tache = tacheRepository.findById(idTache)
-            .orElseThrow(() -> new RuntimeException("Tache not found"));
-        List<Membre> membres = tache.getMembres();
-        List<MembreDTO> membresDTO = new ArrayList<>();
-        for (Membre membre : membres) {
-            membresDTO.add(GetMembreDTO(membre));
-        }
-        return membresDTO;
+  public String Encrypted(String Pwd) {
+    return passwordEncoder.encode(Pwd);
+  }
+
+  public MembreDTO SaveBD(Membre m) {
+    Membre saved = membreRepository.save(m);
+    return GetMembreDTO(saved);
+  }
+
+  public MembreDTO GetMembreDTO(Membre m) {
+    MembreDTO membreReturn = new MembreDTO();
+    membreReturn.setPrenom(m.getPrenom());
+    membreReturn.setNom(m.getNom());
+    membreReturn.setEmail(m.getEmail());
+    membreReturn.setId(m.getId());
+    return membreReturn;
+  }
+
+  public MembreDTO GetMembreDTO(Optional<Membre> membre) throws RuntimeException {
+    if (!membre.isPresent()) {
+      throw new RuntimeException("Le membre n'existe pas");
     }
+    Membre m = membre.get();
+    return GetMembreDTO(m);
+  }
 
-    @Transactional
-    public void updatePwdByIdMembre(Long IdMembre, String Pwd){
-        Membre membre = membreRepository.findById(IdMembre).orElseThrow(() -> new RuntimeException("Membre not found"));
-        if (Pwd == null || Pwd.isBlank()) {
-            throw new RuntimeException("Le mot de passe est obligatoire");
-        }
-        membre.setPassword(Encrypted(Pwd));
-        membreRepository.save(membre);
+  public Membre GetMembre(Optional<Membre> membre) throws RuntimeException {
+    if (!membre.isPresent()) {
+      throw new RuntimeException("Le membre n'existe pas");
     }
+    return membre.get();
+  }
 
-
-    //##### PARTIE TACHE ######
-
-    @Transactional
-    public List<MembreDTO> addMembreToTache(Long idMembre, Long idTache) {
-        Membre membre = membreRepository.findById(idMembre)
-            .orElseThrow(() -> new RuntimeException("Membre not found"));
-        Tache tache = tacheRepository.findById(idTache)
-            .orElseThrow(() -> new RuntimeException("Tache not found"));
-        if (!membre.getTaches().contains(tache)) {
-            membre.getTaches().add(tache);
-            membreRepository.save(membre);
-        }
-        
-        Long idGroupe = tache.getGroupe().getId();
-        String frequenceRadio = "/topic/groupe/" + idGroupe;
-        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
-        
-        return getAllMembresByTache(idTache);
+  @Transactional
+  public void DelMembre(Membre m) {
+    List<Long> idGroupes = m.getGroupes().stream()
+        .map(mg -> mg.getGroupe().getId())
+        .collect(java.util.stream.Collectors.toList());
+    membreRepository.delete(m);
+    for (Long idGroupe : idGroupes) {
+      long nbMembresRestants = membreGroupeRepository.countByGroupeId(idGroupe);
+      if (nbMembresRestants == 0) {
+        groupeRepository.findById(idGroupe).ifPresent(groupeRepository::delete);
+      }
     }
+  }
 
-    @Transactional
-    public List<MembreDTO> deleteMembreFromTache(Long idMembre, Long idTache) {
-        Membre membre = membreRepository.findById(idMembre)
-            .orElseThrow(() -> new RuntimeException("Membre not found"));
-        Tache tache = tacheRepository.findById(idTache)
-            .orElseThrow(() -> new RuntimeException("Tache not found"));
-        if (membre.getTaches().contains(tache)) {
-            membre.getTaches().remove(tache);
-            membreRepository.save(membre);
-        }
-        
-        Long idGroupe = tache.getGroupe().getId();
-        String frequenceRadio = "/topic/groupe/" + idGroupe;
-        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
-        
-        return getAllMembresByTache(idTache);
+  @Transactional
+  @Scheduled(cron = "0 0 3 * * *")
+  public void DelFantomeUser() {
+    List<Membre> membres = membreRepository.findAll();
+    for (Membre membre : membres) {
+      if (membre.getLastConnection() == null) {
+        continue;
+      }
+      if (Math.abs(ChronoUnit.DAYS.between(membre.getLastConnection(), LocalDate.now())) >= 30) {
+        membreRepository.delete(membre);
+      }
+    }
+  }
+
+  public List<MembreDTO> getAllMembresByTache(Long idTache) {
+    Tache tache = tacheRepository.findById(idTache)
+        .orElseThrow(() -> new RuntimeException("Tache not found"));
+    List<Membre> membres = tache.getMembres();
+    List<MembreDTO> membresDTO = new ArrayList<>();
+    for (Membre membre : membres) {
+      membresDTO.add(GetMembreDTO(membre));
+    }
+    return membresDTO;
+  }
+
+  @Transactional
+  public void updatePwdByIdMembre(Long IdMembre, String Pwd) {
+    Membre membre = membreRepository.findById(IdMembre).orElseThrow(() -> new RuntimeException("Membre not found"));
+    if (Pwd == null || Pwd.isBlank()) {
+      throw new RuntimeException("Le mot de passe est obligatoire");
+    }
+    membre.setPassword(Encrypted(Pwd));
+    membreRepository.save(membre);
+  }
+
+  // ##### PARTIE TACHE ######
+
+  @Transactional
+  public List<MembreDTO> addMembreToTache(Long idMembre, Long idTache) {
+    Membre membre = membreRepository.findById(idMembre)
+        .orElseThrow(() -> new RuntimeException("Membre not found"));
+    Tache tache = tacheRepository.findById(idTache)
+        .orElseThrow(() -> new RuntimeException("Tache not found"));
+    if (!membre.getTaches().contains(tache)) {
+      membre.getTaches().add(tache);
+      membreRepository.save(membre);
     }
 
-    public TacheDTO updateTacheDTO(TacheDTO tacheDTO) {
-        Tache tache = tacheRepository.findById(tacheDTO.getId())
-                .orElseThrow(() -> new RuntimeException("Tache not found"));
+    Long idGroupe = tache.getGroupe().getId();
+    String frequenceRadio = "/topic/groupe/" + idGroupe;
+    messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
 
-        tache.setNom(tacheDTO.getNom());
-        tache.setDescription(tacheDTO.getDescription());
-        tache.setDateDebut(tacheDTO.getDateDebut());
-        tache.setDateLimite(tacheDTO.getDateLimite());
-        
-        tacheRepository.save(tache);
-        
-        Long idGroupe = tache.getGroupe().getId();
-        String frequenceRadio = "/topic/groupe/" + idGroupe;
-        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+    return getAllMembresByTache(idTache);
+  }
 
-        return this.convertTacheToDTO(tache);
-    }
-    @Transactional
-    public void deleteTache(Long id) {
-        Tache tache = tacheRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Tache not found"));
-        Long idGroupe = tache.getGroupe().getId();
-        
-        for (Membre membre : new ArrayList<>(tache.getMembres())) {
-            membre.getTaches().remove(tache);
-        }
-        tache.getMembres().clear();
-        tacheRepository.save(tache);
-        tacheRepository.delete(tache);
-        
-        String frequenceRadio = "/topic/groupe/" + idGroupe;
-        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+  @Transactional
+  public List<MembreDTO> deleteMembreFromTache(Long idMembre, Long idTache) {
+    Membre membre = membreRepository.findById(idMembre)
+        .orElseThrow(() -> new RuntimeException("Membre not found"));
+    Tache tache = tacheRepository.findById(idTache)
+        .orElseThrow(() -> new RuntimeException("Tache not found"));
+    if (membre.getTaches().contains(tache)) {
+      membre.getTaches().remove(tache);
+      membreRepository.save(membre);
     }
 
-    public TacheDTO addTache(TacheDTO tacheDTO, Groupe groupe) {
-        // Vérification d'unicité : même nom de tâche dans le même groupe
-        if (tacheDTO.getNom() != null && tacheDTO.getNom().trim().length() > 0 && tacheDTO.getId() != null) {
-            Tache tacheExistante = tacheRepository.findById(tacheDTO.getId()).orElse(null);
-            if (tacheExistante != null && tacheExistante.getNom().equalsIgnoreCase(tacheDTO.getNom())) {
-                throw new RuntimeException("Cette tâche existe déjà dans ce groupe");
-            }
-        }
-        Tache tache = new Tache();
-        tache.setNom(tacheDTO.getNom());
-        tache.setGroupe(groupe);
-        tache.setDescription(tacheDTO.getDescription());
-        tache.setDateDebut(tacheDTO.getDateDebut());
-        tache.setDateLimite(tacheDTO.getDateLimite());
-        tache.setEtat(EtatTache.A_FAIRE);
-        tacheRepository.save(tache);
-        
-        Long idGroupe = groupe.getId();
-        String frequenceRadio = "/topic/groupe/" + idGroupe;
-        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+    Long idGroupe = tache.getGroupe().getId();
+    String frequenceRadio = "/topic/groupe/" + idGroupe;
+    messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
 
-        return tacheDTO;
-    }
+    return getAllMembresByTache(idTache);
+  }
 
-    public Tache getTacheById(Long id) {
-        return tacheRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tache not found"));
-    }
+  public TacheDTO updateTacheDTO(TacheDTO tacheDTO) {
+    Tache tache = tacheRepository.findById(tacheDTO.getId())
+        .orElseThrow(() -> new RuntimeException("Tache not found"));
 
-    public Tache updateTache(Tache tache) {
-        Tache existingTache = tacheRepository.findById(tache.getId())
-                .orElseThrow(() -> new RuntimeException("Tache not found"));
-        existingTache.setNom(tache.getNom());
-        existingTache.setDescription(tache.getDescription());
-        existingTache.setDateDebut(tache.getDateDebut());
-        existingTache.setDateLimite(tache.getDateLimite());
-        Tache savedTache = tacheRepository.save(existingTache);
-        
-        Long idGroupe = savedTache.getGroupe().getId();
-        String frequenceRadio = "/topic/groupe/" + idGroupe;
-        messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
-        
-        return savedTache;
+    tache.setNom(tacheDTO.getNom());
+    tache.setDescription(tacheDTO.getDescription());
+    tache.setDateDebut(tacheDTO.getDateDebut());
+    tache.setDateLimite(tacheDTO.getDateLimite());
+
+    tacheRepository.save(tache);
+
+    Long idGroupe = tache.getGroupe().getId();
+    String frequenceRadio = "/topic/groupe/" + idGroupe;
+    messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+
+    return this.convertTacheToDTO(tache);
+  }
+
+  @Transactional
+  public void deleteTache(Long id) {
+    Tache tache = tacheRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Tache not found"));
+    Long idGroupe = tache.getGroupe().getId();
+
+    for (Membre membre : new ArrayList<>(tache.getMembres())) {
+      membre.getTaches().remove(tache);
     }
-    public List<TacheDTO> getTacheDTO(Membre membre) {
-        List<Tache> taches = membre.getTaches();
-        List<TacheDTO> tachesDTO = new ArrayList<>();
-        for (Tache tache : taches) {
-            TacheDTO tacheDTO = new TacheDTO();
-            tacheDTO.setId(tache.getId());
-            tacheDTO.setNom(tache.getNom());
-            tacheDTO.setDescription(tache.getDescription());
-            tacheDTO.setDateDebut(tache.getDateDebut());
-            tacheDTO.setDateLimite(tache.getDateLimite());
-            tachesDTO.add(tacheDTO);
-        }
-        return tachesDTO;
+    tache.getMembres().clear();
+    tacheRepository.save(tache);
+    tacheRepository.delete(tache);
+
+    String frequenceRadio = "/topic/groupe/" + idGroupe;
+    messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+  }
+
+  public TacheDTO addTache(TacheDTO tacheDTO, Groupe groupe) {
+    // Vérification d'unicité : même nom de tâche dans le même groupe
+    if (tacheDTO.getNom() != null && tacheDTO.getNom().trim().length() > 0 && tacheDTO.getId() != null) {
+      Tache tacheExistante = tacheRepository.findById(tacheDTO.getId()).orElse(null);
+      if (tacheExistante != null && tacheExistante.getNom().equalsIgnoreCase(tacheDTO.getNom())) {
+        throw new RuntimeException("Cette tâche existe déjà dans ce groupe");
+      }
     }
-    public TacheDTO convertTacheToDTO(Tache tache) {
-        TacheDTO dto = new TacheDTO();
-        dto.setId(tache.getId());
-        dto.setNom(tache.getNom());
-        dto.setDescription(tache.getDescription());
-        dto.setDateDebut(tache.getDateDebut());
-        dto.setDateLimite(tache.getDateLimite());
-        return dto;
+    Tache tache = new Tache();
+    tache.setNom(tacheDTO.getNom());
+    tache.setGroupe(groupe);
+    tache.setDescription(tacheDTO.getDescription());
+    tache.setDateDebut(tacheDTO.getDateDebut());
+    tache.setDateLimite(tacheDTO.getDateLimite());
+    tache.setEtat(EtatTache.A_FAIRE);
+    tacheRepository.save(tache);
+
+    Long idGroupe = groupe.getId();
+    String frequenceRadio = "/topic/groupe/" + idGroupe;
+    messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+
+    return tacheDTO;
+  }
+
+  public Tache getTacheById(Long id) {
+    return tacheRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Tache not found"));
+  }
+
+  public Tache updateTache(Tache tache) {
+    Tache existingTache = tacheRepository.findById(tache.getId())
+        .orElseThrow(() -> new RuntimeException("Tache not found"));
+    existingTache.setNom(tache.getNom());
+    existingTache.setDescription(tache.getDescription());
+    existingTache.setDateDebut(tache.getDateDebut());
+    existingTache.setDateLimite(tache.getDateLimite());
+    Tache savedTache = tacheRepository.save(existingTache);
+
+    Long idGroupe = savedTache.getGroupe().getId();
+    String frequenceRadio = "/topic/groupe/" + idGroupe;
+    messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+
+    return savedTache;
+  }
+
+  public List<TacheDTO> getTacheDTO(Membre membre) {
+    List<Tache> taches = membre.getTaches();
+    List<TacheDTO> tachesDTO = new ArrayList<>();
+    for (Tache tache : taches) {
+      TacheDTO tacheDTO = new TacheDTO();
+      tacheDTO.setId(tache.getId());
+      tacheDTO.setNom(tache.getNom());
+      tacheDTO.setDescription(tache.getDescription());
+      tacheDTO.setDateDebut(tache.getDateDebut());
+      tacheDTO.setDateLimite(tache.getDateLimite());
+      tachesDTO.add(tacheDTO);
     }
+    return tachesDTO;
+  }
+
+  public TacheDTO convertTacheToDTO(Tache tache) {
+    TacheDTO dto = new TacheDTO();
+    dto.setId(tache.getId());
+    dto.setNom(tache.getNom());
+    dto.setDescription(tache.getDescription());
+    dto.setDateDebut(tache.getDateDebut());
+    dto.setDateLimite(tache.getDateLimite());
+    return dto;
+  }
 }

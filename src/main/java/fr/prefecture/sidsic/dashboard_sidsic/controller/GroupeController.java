@@ -34,10 +34,10 @@ public class GroupeController {
         }
     }
 
-    @GetMapping("/membres/{id}/groupes/admin")
-    public ResponseEntity<?> GetAllByMembreAdmin(@PathVariable Long id) {
+    @GetMapping("/membres/{id}/groupes/role/{role}")
+    public ResponseEntity<?> getGroupesByRole(@PathVariable Long id, @PathVariable int role) {
         try {
-            return ResponseEntity.ok(groupeService.getAllByMembreAdmin(id));
+            return ResponseEntity.ok(groupeService.getGroupesByRole(id, role));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
@@ -52,10 +52,19 @@ public class GroupeController {
         }
     }
 
-    @GetMapping("/groupes/{idGroupe}/membres/admin")
-    public ResponseEntity<?> GetAllMembreAdmin(@PathVariable Long idGroupe) {
+    @GetMapping("/groupes/{idGroupe}/membres/role/{role}")
+    public ResponseEntity<?> getMembresByRole(@PathVariable Long idGroupe, @PathVariable int role) {
         try {
-            return ResponseEntity.ok(groupeService.getAllAdmin(idGroupe));
+            return ResponseEntity.ok(groupeService.getMembresByRole(idGroupe, role));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/groupes/{idGroupe}/membres/{idMembre}/role")
+    public ResponseEntity<?> getUserRole(@PathVariable Long idMembre, @PathVariable Long idGroupe) {
+        try {
+            return ResponseEntity.ok(groupeService.getUserRole(idMembre, idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
@@ -89,26 +98,21 @@ public class GroupeController {
         }
     }
 
-    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/promote/by/{idMembreActuel}")
-    public ResponseEntity<?> updateMembreToAdmin(@PathVariable Long idMembreActuel, @PathVariable Long idGroupe, @PathVariable Long idMembre) {
+    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/role/{role}/by/{idMembreActuel}")
+    public ResponseEntity<?> setMembreRole(@PathVariable Long idMembreActuel, @PathVariable Long idGroupe,
+            @PathVariable Long idMembre, @PathVariable int role) {
         try {
-            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idMembre, idGroupe, true, idMembreActuel));
+            return ResponseEntity.ok(groupeService.setMembreRole(idMembre, idGroupe, role, idMembreActuel));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/demote/by/{idMembreActuel}")
-    public ResponseEntity<?> updateAdminToMembre(@PathVariable Long idMembreActuel, @PathVariable Long idGroupe, @PathVariable Long idMembre) {
+
+    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/role/{role}/urgent")
+    public ResponseEntity<?> setMembreRoleUrgent(@PathVariable Long idGroupe,
+            @PathVariable Long idMembre, @PathVariable int role) {
         try {
-            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idMembre, idGroupe, false, idMembreActuel));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
-    }
-    @PatchMapping("/groupes/{idGroupe}/membres/{idMembre}/promote/urgent")
-    public ResponseEntity<?> updateMembreToAdminUrgent(@PathVariable Long idGroupe, @PathVariable Long idMembre) {
-        try {
-            return ResponseEntity.ok(groupeService.updateMembreToAdmin(idMembre, idGroupe, true, null));
+            return ResponseEntity.ok(groupeService.setMembreRole(idMembre, idGroupe, role, null));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }

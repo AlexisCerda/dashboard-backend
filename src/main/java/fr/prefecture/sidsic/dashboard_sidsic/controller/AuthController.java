@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -61,7 +62,8 @@ public class AuthController {
             
             Membre membreConnecte = membreRepository.findByEmail(requeteConnexion.getEmail())
                     .orElseThrow(() -> new RuntimeException("Membre introuvable"));
-            
+            membreConnecte.setLastConnection(LocalDate.now());
+            membreRepository.save(membreConnecte);
             String jwtToken = jwtService.generateToken(membreConnecte);
             
             MembreDTO infosUtilisateur = new MembreDTO();

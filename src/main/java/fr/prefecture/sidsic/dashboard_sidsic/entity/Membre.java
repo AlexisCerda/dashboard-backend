@@ -1,5 +1,6 @@
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,8 @@ public class Membre implements UserDetails {
     private String email;
     
     private String password;
+
+    private LocalDate LastConnection;
 
     @ManyToMany
     @JoinTable(

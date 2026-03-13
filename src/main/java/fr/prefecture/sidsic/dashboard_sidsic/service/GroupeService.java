@@ -127,11 +127,11 @@ public class GroupeService {
         return convertToDTO(groupe);
     }
 
-    public List<MembreDTO> getAllAdmin(Long idGroupe) {
+    public List<MembreDTO> getMembresByRole(Long idGroupe, int role) {
         List<MembreGroupe> membresGroupes = membreGroupeRepository.findByGroupeId(idGroupe);
         List<MembreDTO> membres = new ArrayList<>();
         for (MembreGroupe membreGroupe : membresGroupes) {
-            if (membreGroupe.getIsAdmin() == 1) {
+            if (membreGroupe.getRole() == role) {
                 membres.add(membreService.GetMembreDTO(membreGroupe.getMembre()));
             }
         }
@@ -147,6 +147,16 @@ public class GroupeService {
         return membres;
     }
 
+    public int getUserRole(Long idMembre, Long idGroupe) {
+        Membre membre = membreRepository.findById(idMembre)
+                .orElseThrow(() -> new RuntimeException("Membre not found"));
+        Groupe groupe = groupeRepository.findById(idGroupe)
+                .orElseThrow(() -> new RuntimeException("Groupe not found"));
+        MembreGroupe membreGroupe = membreGroupeRepository.findByMembreAndGroupe(membre, groupe)
+                .orElseThrow(() -> new RuntimeException("MembreGroupe not found"));
+        return membreGroupe.getRole();
+    }
+
     public List<GroupeDTO> getAllByMembre(Long idMembre) {
         Membre membre = membreRepository.findById(idMembre)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
@@ -157,12 +167,12 @@ public class GroupeService {
         return groupes;
     }
 
-    public List<GroupeDTO> getAllByMembreAdmin(Long idMembre) {
+    public List<GroupeDTO> getGroupesByRole(Long idMembre, int role) {
         Membre membre = membreRepository.findById(idMembre)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
         List<GroupeDTO> groupes = new ArrayList<>();
         for (MembreGroupe membreGroupe : membre.getGroupes()) {
-            if (membreGroupe.getIsAdmin() == 1) {
+            if (membreGroupe.getRole() == role) {
                 groupes.add(this.convertToDTO(membreGroupe.getGroupe()));
             }
         }
@@ -204,7 +214,7 @@ public class GroupeService {
         MembreGroupe membreGroupe = new MembreGroupe();
         membreGroupe.setMembre(membre);
         membreGroupe.setGroupe(groupe);
-        membreGroupe.setIsAdmin(1);
+        membreGroupe.setRole(MembreGroupe.ROLE_ADMIN);
         membreGroupeRepository.save(membreGroupe);
         return this.convertToDTO(groupe);
     }
@@ -212,7 +222,7 @@ public class GroupeService {
     public List<MembreDTO> addMembreToGroupe(Long idMembre, Long idGroupe, Long idMembreActuel) {
         Membre membreActuel = membreRepository.findById(idMembreActuel)
                 .orElseThrow(() -> new RuntimeException("Membre not found"));
-        if (this.getAllAdmin(idGroupe).stream().noneMatch(m -> m.getId().equals(membreActuel.getId()))) {
+        if (this.getUserRole(membreActuel.getId(), idGroupe) != MembreGroupe.ROLE_ADMIN) {
             throw new RuntimeException("Vous n'êtes pas admin de ce groupe");
         }
         Membre membre = membreRepository.findById(idMembre)
@@ -229,7 +239,7 @@ public class GroupeService {
         MembreGroupe membreGroupe = new MembreGroupe();
         membreGroupe.setMembre(membre);
         membreGroupe.setGroupe(groupe);
-        membreGroupe.setIsAdmin(0);
+        membreGroupe.setRole(MembreGroupe.ROLE_INVITE);
         membreGroupeRepository.save(membreGroupe);
         
         String frequenceRadio = "/topic/groupe/" + idGroupe;
@@ -242,11 +252,14 @@ public class GroupeService {
         return membres;
     }
 
-    public List<MembreDTO> updateMembreToAdmin(Long idMembre, Long idGroupe, Boolean isAdmin, Long idMembreActuel) {
+    public List<MembreDTO> setMembreRole(Long idMembre, Long idGroupe, int role, Long idMembreActuel) {
+        if (role < MembreGroupe.ROLE_INVITE || role > MembreGroupe.ROLE_MEMBRE) {
+            throw new RuntimeException("Rôle invalide. Valeurs autorisées : 0 (invité), 1 (admin), 2 (membre)");
+        }
         if (!(idMembreActuel == null)) {
             Membre membreActuel = membreRepository.findById(idMembreActuel)
                     .orElseThrow(() -> new RuntimeException("Membre not found"));
-            if (this.getAllAdmin(idGroupe).stream().noneMatch(m -> m.getId().equals(membreActuel.getId()))) {
+            if (this.getUserRole(membreActuel.getId(), idGroupe) != MembreGroupe.ROLE_ADMIN) {
                 throw new RuntimeException("Vous n'êtes pas admin de ce groupe");
             }
         }
@@ -256,7 +269,7 @@ public class GroupeService {
                 .orElseThrow(() -> new RuntimeException("Groupe not found"));
         MembreGroupe membreGroupe = membreGroupeRepository.findByMembreAndGroupe(membre, groupe)
                 .orElseThrow(() -> new RuntimeException("MembreGroupe not found"));
-        membreGroupe.setIsAdmin(isAdmin ? 1 : 0);
+        membreGroupe.setRole(role);
         membreGroupeRepository.save(membreGroupe);
         
         String frequenceRadio = "/topic/groupe/" + idGroupe;

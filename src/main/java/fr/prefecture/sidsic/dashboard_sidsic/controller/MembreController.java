@@ -1,5 +1,7 @@
 package fr.prefecture.sidsic.dashboard_sidsic.controller;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreCreationRequestDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreUpdateDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.UpdatePasswordRequestDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
+import fr.prefecture.sidsic.dashboard_sidsic.security.JwtService;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 import fr.prefecture.sidsic.dashboard_sidsic.service.MembreService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,10 +35,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class MembreController {
     private final MembreService membreService;
     private final GroupeService groupeService;
+    private final JwtService jwtService;
 
-    public MembreController(MembreService membreService, GroupeService groupeService) {
+    public MembreController(MembreService membreService, GroupeService groupeService, JwtService jwtService) {
         this.membreService = membreService;
         this.groupeService = groupeService;
+        this.jwtService = jwtService;
     }
 
     
@@ -83,12 +88,22 @@ public class MembreController {
                     throw new RuntimeException("L'Email est deja pris !");
                 }
                 Membre membreExist = m.get();
+                boolean emailChange = !membre.getEmail().equals(membreExist.getEmail());
                 membreExist.setPrenom(membre.getPrenom());
                 membreExist.setNom(membre.getNom());
                 membreExist.setEmail(membre.getEmail());
                 membreExist.setPassword(membreExist.getPassword());
                 membreService.SaveBD(membreExist);
-                return ResponseEntity.ok(membreService.GetMembreDTO(membreExist));
+
+                MembreDTO membreDTO = membreService.GetMembreDTO(membreExist);
+                if (emailChange) {
+                    String nouveauToken = jwtService.generateToken(membreExist);
+                    Map<String, Object> reponse = new HashMap<>();
+                    reponse.put("token", nouveauToken);
+                    reponse.put("utilisateur", membreDTO);
+                    return ResponseEntity.ok(reponse);
+                }
+                return ResponseEntity.ok(membreDTO);
             }else{
                 throw new RuntimeException("Le membre n'existe pas");
             }
@@ -124,11 +139,12 @@ public class MembreController {
     }
 
     @PatchMapping("/{idMembre}/groupe-actuel/{idGroupe}")
-    public ResponseEntity<?> updateCurrentGroupe(@PathVariable Long idMembre, @PathVariable Long idGroupe) {
+    public ResponseEntity<?> updateCurrentGroupe(@PathVariable("idMembre") Long idMembre, @PathVariable("idGroupe") Long idGroupe) {
         try {
             return ResponseEntity.ok(groupeService.updateCurrentGroupe(idMembre, idGroupe));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 

@@ -8,7 +8,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MembreGroupe {
-    public MembreGroupe(){}
+    public static final int ROLE_INVITE = 0;
+    public static final int ROLE_ADMIN = 1;
+    public static final int ROLE_MEMBRE = 2;
+
+    public MembreGroupe() {
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,5 +29,13 @@ public class MembreGroupe {
     private Groupe groupe;
 
     private int IsAdmin;
+
+    public int getRole() {
+        return IsAdmin;
+    }
+
+    public void setRole(int role) {
+        this.IsAdmin = role;
+    }
 
 }
