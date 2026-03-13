@@ -17,12 +17,21 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String LOGIN_PATH = "/api/auth/login";
+    private static final String REGISTER_PATH = "/api/auth/register";
+
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String servletPath = request.getServletPath();
+        return LOGIN_PATH.equals(servletPath) || REGISTER_PATH.equals(servletPath);
     }
 
     @Override

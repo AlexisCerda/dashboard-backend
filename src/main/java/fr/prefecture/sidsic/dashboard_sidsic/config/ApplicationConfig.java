@@ -1,4 +1,4 @@
-package fr.prefecture.sidsic.dashboard_sidsic;
+package fr.prefecture.sidsic.dashboard_sidsic.config;
 
 import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreRepository;
 import org.springframework.context.annotation.Bean;

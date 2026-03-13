@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
@@ -26,18 +27,19 @@ public class MembreService {
     private final TacheRepository tacheRepository;
     private final GroupeRepository groupeRepository;
     private final MembreGroupeRepository membreGroupeRepository;
-    //private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository,
-            GroupeRepository groupeRepository, MembreGroupeRepository membreGroupeRepository) {
+            GroupeRepository groupeRepository, MembreGroupeRepository membreGroupeRepository,
+            PasswordEncoder passwordEncoder) {
         this.membreRepository = membreRepository;
         this.tacheRepository = tacheRepository;
         this.groupeRepository = groupeRepository;
         this.membreGroupeRepository = membreGroupeRepository;
-        //this.passwordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<MembreDTO> recupererToutLesMembres() {
@@ -65,9 +67,12 @@ public class MembreService {
         if (!nouveauMembre.getEmail().contains("@")) {
             throw new RuntimeException("Veuillez entrer une adresse mail valide");
         }
+        if (mdp == null || mdp.isBlank()) {
+            throw new RuntimeException("Le mot de passe est obligatoire");
+        }
         Membre m = new Membre();
-        String motDePasseEnClair = this.Encrypted(mdp);
-        m.setPassword(motDePasseEnClair);
+        String motDePasseCrypte = this.Encrypted(mdp);
+        m.setPassword(motDePasseCrypte);
         m.setNom(nouveauMembre.getNom().toUpperCase());
         m.setPrenom(nouveauMembre.getPrenom().toUpperCase());
         m.setEmail(nouveauMembre.getEmail());
@@ -78,14 +83,13 @@ public class MembreService {
     public Membre verifierConnexion(String email, String motDePasse) {
         Membre leMembre = membreRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-        if (!leMembre.getPassword().equals(motDePasse)) {
+        if (!passwordEncoder.matches(motDePasse, leMembre.getPassword())) {
             throw new RuntimeException("Mot de passe incorrect");
         }
         return leMembre;
     }
     public String Encrypted(String Pwd){
-        //String motDePasseCrypte = passwordEncoder.encode(motDePasseEnClair);
-        return Pwd;
+        return passwordEncoder.encode(Pwd);
     }
 
     public MembreDTO SaveBD(Membre m){
@@ -142,6 +146,9 @@ public class MembreService {
     @Transactional
     public void updatePwdByIdMembre(Long IdMembre, String Pwd){
         Membre membre = membreRepository.findById(IdMembre).orElseThrow(() -> new RuntimeException("Membre not found"));
+        if (Pwd == null || Pwd.isBlank()) {
+            throw new RuntimeException("Le mot de passe est obligatoire");
+        }
         membre.setPassword(Encrypted(Pwd));
         membreRepository.save(membre);
     }

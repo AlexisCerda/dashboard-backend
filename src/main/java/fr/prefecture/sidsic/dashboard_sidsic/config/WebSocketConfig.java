@@ -1,4 +1,4 @@
-package fr.prefecture.sidsic.dashboard_sidsic;
+package fr.prefecture.sidsic.dashboard_sidsic.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

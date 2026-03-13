@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreCreationRequestDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreUpdateDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.UpdatePasswordRequestDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
 import fr.prefecture.sidsic.dashboard_sidsic.service.GroupeService;
 import fr.prefecture.sidsic.dashboard_sidsic.service.MembreService;
@@ -56,13 +60,25 @@ public class MembreController {
     @PutMapping("/")
     public ResponseEntity<?> updateMembreById(@RequestBody MembreUpdateDTO membre ){
         try {
+            if (membre.getId() == null) {
+                MembreDTO nouveauMembre = new MembreDTO();
+                nouveauMembre.setNom(membre.getNom());
+                nouveauMembre.setPrenom(membre.getPrenom());
+                nouveauMembre.setEmail(membre.getEmail());
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(membreService.creerUnNouveauMembre(nouveauMembre, membre.getPwd()));
+            }
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentification requise");
+            }
+
             Optional<Membre> m = membreService.getMembreById(membre.getId());
             if (m.isPresent()) {
                 if (!membre.getEmail().contains("@")) {
                     throw new RuntimeException("Veuillez entrer une adresse mail valide");
                 }
-                System.out.println(membre.getEmail().equals(m.get().getEmail()));
-                System.out.println(membreService.getMembreByEmail(membre.getEmail()).isPresent());
                 if (membreService.getMembreByEmail(membre.getEmail()).isPresent() && !(membre.getEmail().equals(m.get().getEmail()))) {
                     throw new RuntimeException("L'Email est deja pris !");
                 }
@@ -93,10 +109,14 @@ public class MembreController {
         }
     }
 
-    @PostMapping("/{mdp}")
-    public ResponseEntity<?> createMembre(@RequestBody MembreDTO membre, @PathVariable String mdp) {
+    @PostMapping
+    public ResponseEntity<?> createMembre(@RequestBody MembreCreationRequestDTO request) {
         try {
-            return ResponseEntity.ok((membreService.creerUnNouveauMembre(membre,mdp)));
+            MembreDTO membre = new MembreDTO();
+            membre.setNom(request.getNom());
+            membre.setPrenom(request.getPrenom());
+            membre.setEmail(request.getEmail());
+            return ResponseEntity.ok((membreService.creerUnNouveauMembre(membre, request.getMotDePasse())));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 
@@ -122,9 +142,9 @@ public class MembreController {
     }
 
     @PatchMapping("/{idMembre}/pwd")
-    public ResponseEntity<?> updatePwdbyIdMembre(@PathVariable Long idMembre, @RequestBody String Pwd ) {
+    public ResponseEntity<?> updatePwdbyIdMembre(@PathVariable Long idMembre, @RequestBody UpdatePasswordRequestDTO request ) {
         try {
-            membreService.updatePwdByIdMembre(idMembre, Pwd);
+            membreService.updatePwdByIdMembre(idMembre, request.getMotDePasse());
             return ResponseEntity.ok(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
