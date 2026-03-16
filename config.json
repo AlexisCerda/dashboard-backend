@@ -1,5 +1,9 @@
 {
-  "emailAdmin": "alexis@",
-  "maxTaches": 10,
-  "maxGroupes": 3
+  "emailAdmin" : "alexis@",
+  "maxTaches" : 999,
+  "maxGroupes" : 10,
+  "maxNotes" : 1000,
+  "maxMouvements" : 1000,
+  "maxAchats" : 1000,
+  "maxPrets" : 1000
 }
