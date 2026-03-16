@@ -127,4 +127,13 @@ public class GroupeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+
+    @GetMapping("/groupes")
+    public ResponseEntity<?> getALLGroupes() {
+        try {
+            return ResponseEntity.ok(groupeService.getAllGroupes());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
 }

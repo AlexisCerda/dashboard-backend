@@ -166,4 +166,12 @@ public class MembreController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+    @GetMapping("/{id}/last-co")
+    public ResponseEntity<?> GetLastConnexionById(@PathVariable Long id ){
+        try {
+            return ResponseEntity.ok(membreService.GetLastCo(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

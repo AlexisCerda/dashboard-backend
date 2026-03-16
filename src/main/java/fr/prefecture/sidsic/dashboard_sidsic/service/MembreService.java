@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTOLastCO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Groupe;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
@@ -174,6 +175,14 @@ public class MembreService {
     }
     membre.setPassword(Encrypted(Pwd));
     membreRepository.save(membre);
+  }
+
+  public MembreDTOLastCO GetLastCo(Long id){
+    Membre membre = membreRepository.findById(id).orElseThrow(() -> new RuntimeException("Membre not found"));
+    MembreDTOLastCO m = new MembreDTOLastCO();
+    m.setId(id);
+    m.setLastco(membre.getLastConnection());
+    return m;
   }
 
   // ##### PARTIE TACHE ######
