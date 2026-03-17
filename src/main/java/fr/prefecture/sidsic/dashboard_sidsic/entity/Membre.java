@@ -44,6 +44,9 @@ public class Membre implements UserDetails {
     @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Note> notes;
 
+    @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Configuration> configurations;
+
     public List<Note> getNotes() {
         if (notes == null) {
             return new ArrayList<>();

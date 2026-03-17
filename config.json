@@ -5,5 +5,7 @@
   "maxNotes" : 1000,
   "maxMouvements" : 1000,
   "maxAchats" : 1000,
-  "maxPrets" : 1000
+  "maxPrets" : 1000,
+  "maxConfigurations" : 10,
+  "maxImages" : 10
 }

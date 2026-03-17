@@ -40,6 +40,9 @@ public class Groupe {
     @OneToMany(mappedBy = "groupe" , cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Tache> taches;
 
+    @OneToMany(mappedBy = "groupe" , cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Configuration> configurations;
+
     public List<TacheDTO> getTaches() {
         List<Tache> taches = this.taches;
         List<TacheDTO> tachesDTO = new ArrayList<>();
