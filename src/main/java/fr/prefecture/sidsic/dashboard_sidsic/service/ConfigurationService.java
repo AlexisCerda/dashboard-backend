@@ -55,37 +55,33 @@ public class ConfigurationService {
         .collect(Collectors.toList());
   }
 
-  public ConfigurationDTO getAllConfigurationsByGroupeAndMembre(Long idGroupe, Long idMembre) {
+  public List<ConfigurationDTO> getAllConfigurationsByGroupeAndMembre(Long idGroupe, Long idMembre) {
     groupeRepository.findById(idGroupe)
         .orElseThrow(() -> new RuntimeException("Groupe not found"));
     membreRepository.findById(idMembre)
         .orElseThrow(() -> new RuntimeException("Membre not found"));
-    Configuration configuration = configurationRepository.findByMembreIdAndGroupeId(idMembre, idGroupe)
-        .orElseThrow(() -> new RuntimeException("Configuration not found for this member in this group"));
-    return convertToDTO(configuration);
+
+    return configurationRepository.findByMembreIdAndGroupeId(idMembre, idGroupe).stream()
+        .map(this::convertToDTO)
+        .collect(Collectors.toList());
   }
 
-  public ConfigurationDTO getConfigurationById(Long idConfiguration) {
-    Configuration configuration = configurationRepository.findById(idConfiguration)
-        .orElseThrow(() -> new RuntimeException("Configuration not found"));
-    return convertToDTO(configuration);
+  public List<ConfigurationDTO> getConfigurationById(Long idConfiguration) {
+    return configurationRepository.findById(idConfiguration).stream().map(this::convertToDTO)
+        .collect(Collectors.toList());
   }
 
   @Transactional
-  public ConfigurationDTO createConfiguration(Long idMembre, Long idGroupe) {
+  public ConfigurationDTO createConfiguration(Long idMembre, Long idGroupe, String nom) {
     Membre membre = membreRepository.findById(idMembre)
         .orElseThrow(() -> new RuntimeException("Membre not found"));
     Groupe groupe = groupeRepository.findById(idGroupe)
         .orElseThrow(() -> new RuntimeException("Groupe not found"));
 
-    boolean existe = configurationRepository.findByMembreIdAndGroupeId(idMembre, idGroupe).isPresent();
-    if (existe) {
-      throw new RuntimeException("Une configuration existe déjà pour ce membre dans ce groupe");
-    }
-
     Configuration configuration = new Configuration();
     configuration.setMembre(membre);
     configuration.setGroupe(groupe);
+    configuration.setNom(nom);
 
     return convertToDTO(configurationRepository.save(configuration));
   }

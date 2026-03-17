@@ -14,5 +14,5 @@ public interface ConfigurationRepository extends JpaRepository<Configuration, Lo
 
 	List<Configuration> findByMembreId(Long idMembre);
 
-	Optional<Configuration> findByMembreIdAndGroupeId(Long idMembre, Long idGroupe);
+	List<Configuration> findByMembreIdAndGroupeId(Long idMembre, Long idGroupe);
 }

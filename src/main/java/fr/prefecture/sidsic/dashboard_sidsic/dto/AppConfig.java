@@ -13,6 +13,8 @@ public class AppConfig {
   private int maxMouvements;
   private int maxAchats;
   private int maxPrets;
+  private int maxConfigurations;
+  private int maxImages;
 
   public AppConfig() {
   }

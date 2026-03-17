@@ -36,17 +36,13 @@ public class ConfigurationController {
 
     @GetMapping("/configurations/{idConfiguration}")
     public ResponseEntity<?> getConfigurationById(@PathVariable Long idConfiguration) {
-        try {
-            return ResponseEntity.ok(configurationService.getConfigurationById(idConfiguration));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        return ResponseEntity.ok(configurationService.getConfigurationById(idConfiguration));
     }
 
     @PostMapping("/groupes/{idGroupe}/membres/{idMembre}/configurations")
-    public ResponseEntity<?> createConfiguration(@PathVariable Long idGroupe, @PathVariable Long idMembre) {
+    public ResponseEntity<?> createConfiguration(@PathVariable Long idGroupe, @PathVariable Long idMembre, @RequestBody String nom) {
         try {
-            return ResponseEntity.ok(configurationService.createConfiguration(idMembre, idGroupe));
+            return ResponseEntity.ok(configurationService.createConfiguration(idMembre, idGroupe, nom));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
