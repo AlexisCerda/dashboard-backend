@@ -53,6 +53,7 @@ public class Groupe {
             tacheDTO.setDescription(tache.getDescription());
             tacheDTO.setDateDebut(tache.getDateDebut());
             tacheDTO.setDateLimite(tache.getDateLimite());
+            tacheDTO.setEtat(tache.getEtat());
             tachesDTO.add(tacheDTO);
         }
         return tachesDTO;

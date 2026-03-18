@@ -108,6 +108,7 @@ public class GroupeService {
       dto.setDescription(tache.getDescription());
       dto.setDateDebut(tache.getDateDebut());
       dto.setDateLimite(tache.getDateLimite());
+      dto.setEtat(tache.getEtat());
       return dto;
    }
 

@@ -231,6 +231,7 @@ public class MembreService {
     tache.setDescription(tacheDTO.getDescription());
     tache.setDateDebut(tacheDTO.getDateDebut());
     tache.setDateLimite(tacheDTO.getDateLimite());
+    tache.setEtat(tacheDTO.getEtat());
 
     tacheRepository.save(tache);
 
@@ -259,7 +260,6 @@ public class MembreService {
   }
 
   public TacheDTO addTache(TacheDTO tacheDTO, Groupe groupe) {
-    // Vérification d'unicité : même nom de tâche dans le même groupe
     if (tacheDTO.getNom() != null && tacheDTO.getNom().trim().length() > 0 && tacheDTO.getId() != null) {
       Tache tacheExistante = tacheRepository.findById(tacheDTO.getId()).orElse(null);
       if (tacheExistante != null && tacheExistante.getNom().equalsIgnoreCase(tacheDTO.getNom())) {
@@ -272,14 +272,14 @@ public class MembreService {
     tache.setDescription(tacheDTO.getDescription());
     tache.setDateDebut(tacheDTO.getDateDebut());
     tache.setDateLimite(tacheDTO.getDateLimite());
-    tache.setEtat(EtatTache.A_FAIRE);
+    tache.setEtat(tacheDTO.getEtat() != null ? tacheDTO.getEtat() : EtatTache.à_FAIRE);
     tacheRepository.save(tache);
 
     Long idGroupe = groupe.getId();
     String frequenceRadio = "/topic/groupe/" + idGroupe;
     messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
 
-    return tacheDTO;
+    return this.convertTacheToDTO(tache);
   }
 
   public Tache getTacheById(Long id) {
@@ -294,6 +294,7 @@ public class MembreService {
     existingTache.setDescription(tache.getDescription());
     existingTache.setDateDebut(tache.getDateDebut());
     existingTache.setDateLimite(tache.getDateLimite());
+    existingTache.setEtat(tache.getEtat());
     Tache savedTache = tacheRepository.save(existingTache);
 
     Long idGroupe = savedTache.getGroupe().getId();
@@ -313,6 +314,7 @@ public class MembreService {
       tacheDTO.setDescription(tache.getDescription());
       tacheDTO.setDateDebut(tache.getDateDebut());
       tacheDTO.setDateLimite(tache.getDateLimite());
+      tacheDTO.setEtat(tache.getEtat());
       tachesDTO.add(tacheDTO);
     }
     return tachesDTO;
@@ -325,6 +327,7 @@ public class MembreService {
     dto.setDescription(tache.getDescription());
     dto.setDateDebut(tache.getDateDebut());
     dto.setDateLimite(tache.getDateLimite());
+    dto.setEtat(tache.getEtat());
     return dto;
   }
 }

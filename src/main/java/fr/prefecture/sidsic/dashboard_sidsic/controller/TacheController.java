@@ -56,6 +56,15 @@ public class TacheController {
         }
     }
 
+    @GetMapping("/taches/{idTache}/membres")
+    public ResponseEntity<?> getMembresByTache(@PathVariable("idTache") Long idTache){
+        try {
+            return ResponseEntity.ok(membreService.getAllMembresByTache(idTache));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @PostMapping("/taches/{idTache}/membres")
     public ResponseEntity<?> addMembreToTache(@PathVariable Long idTache, @RequestBody AddMembreTache addMembreTache){
         try {
@@ -94,7 +103,7 @@ public class TacheController {
     }
 
     @PostMapping("/groupes/{idGroupe}/taches")
-    public ResponseEntity<?> addTache(@RequestBody TacheDTO tacheDTO,@PathVariable Long idGroupe){
+    public ResponseEntity<?> addTache(@RequestBody TacheDTO tacheDTO,@PathVariable("idGroupe") Long idGroupe){
         try {
             return ResponseEntity.ok(membreService.addTache(tacheDTO, groupeService.getGroupeById(idGroupe)));
         } catch (RuntimeException e) {
