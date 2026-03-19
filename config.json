@@ -1,11 +1,11 @@
 {
-  "emailAdmin" : "alexis@",
-  "maxTaches" : 999,
+  "emailAdmin" : "admin@gmail.com",
+  "maxTaches" : 100,
   "maxGroupes" : 10,
-  "maxNotes" : 1000,
-  "maxMouvements" : 1000,
-  "maxAchats" : 1000,
-  "maxPrets" : 1000,
+  "maxNotes" : 100,
+  "maxMouvements" : 100,
+  "maxAchats" : 100,
+  "maxPrets" : 100,
   "maxConfigurations" : 10,
   "maxImages" : 10
 }
