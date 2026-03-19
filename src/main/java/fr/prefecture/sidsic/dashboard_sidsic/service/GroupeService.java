@@ -30,6 +30,7 @@ import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.MouvementRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.PretRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.AchatRepository;
+import fr.prefecture.sidsic.dashboard_sidsic.repository.TacheRepository;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -41,6 +42,7 @@ public class GroupeService {
    private final MouvementRepository mouvementRepository;
    private final PretRepository pretRepository;
    private final AchatRepository achatRepository;
+   private final TacheRepository tacheRepository;
    private final MembreService membreService;
 
    @Autowired
@@ -48,13 +50,14 @@ public class GroupeService {
 
    public GroupeService(GroupeRepository groupeRepository, MembreRepository membreRepository,
          MembreGroupeRepository membreGroupeRepository, MouvementRepository mouvementRepository,
-         PretRepository pretRepository, AchatRepository achatRepository, MembreService membreService) {
+         PretRepository pretRepository, AchatRepository achatRepository, TacheRepository tacheRepository, MembreService membreService) {
       this.groupeRepository = groupeRepository;
       this.membreRepository = membreRepository;
       this.membreGroupeRepository = membreGroupeRepository;
       this.mouvementRepository = mouvementRepository;
       this.pretRepository = pretRepository;
       this.achatRepository = achatRepository;
+      this.tacheRepository = tacheRepository;
       this.membreService = membreService;
    }
 
@@ -309,6 +312,8 @@ public class GroupeService {
          }
          membreRepository.saveAll(groupe.getMembres_current());
       }
+
+      tacheRepository.deleteTaskMemberLinksByGroupeId(idGroupe);
 
       groupeRepository.delete(groupe);
    }

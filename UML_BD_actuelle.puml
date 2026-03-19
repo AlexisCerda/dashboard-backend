@@ -1,0 +1,188 @@
+@startuml
+top to bottom direction
+skinparam linetype polyline
+skinparam nodesep 55
+skinparam ranksep 90
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+
+entity "Groupe" as Groupe {
+  - id : Long <<PK>>
+  --
+  version : int
+  nom : String
+  ville : String
+}
+
+entity "Membre" as Membre {
+  - id : Long <<PK>>
+  --
+  version : int
+  email : String
+  password : String
+  LastConnection : LocalDate
+  Nom : String
+  Prenom : String
+  CurrentGroupe : Long <<FK>>
+}
+
+entity "Tache" as Tache {
+  - id : Long <<PK>>
+  --
+  version : int
+  IDgroupe : Long <<FK>>
+  nom : String
+  Description : String
+  dateDebut : LocalDate
+  dateLimite : LocalDate
+  etat : EtatTache
+}
+
+entity "Mouvement" as Mouvement {
+  - id : Long <<PK>>
+  --
+  version : int
+  etat : EtatMouvement
+  IDgroupe : Long <<FK>>
+  nom : String
+  prenom : String
+  dateArrivee : LocalDate
+  dateDepart : LocalDate
+}
+
+entity "Pret" as Pret {
+  - id : Long <<PK>>
+  --
+  version : int
+  IDgroupe : Long <<FK>>
+  NomMateriel : String
+  MarqueMateriel : String
+  NomPersonne : String
+  PrenomPersonne : String
+  quantite : int
+  etat : EtatPret
+  dateDebut : LocalDate
+  dateFin : LocalDate
+}
+
+entity "Achat" as Achat {
+  - id : Long <<PK>>
+  --
+  version : int
+  IDgroupe : Long <<FK>>
+  NomMateriel : String
+  MarqueMateriel : String
+  Reference : String
+  quantite : int
+  NomPersonne : String
+  PrenomPersonne : String
+  etat : EtatAchat
+}
+
+entity "Configuration" as Configuration {
+  - id : Long <<PK>>
+  --
+  version : int
+  IDgroupe : Long <<FK>>
+  IDmembre : Long <<FK>>
+  Nom : String
+  Taches : String
+  Notes : String
+  Achats : String
+  Prets : String
+  Mouvements : String
+}
+
+entity "MembreGroupe" as MembreGroupe {
+  - id : Long <<PK>>
+  --
+  version : int
+  IDmembre : Long <<FK>>
+  IDgroupe : Long <<FK>>
+  IsAdmin : int
+}
+
+entity "Tache2Membre" as Tache2Membre {
+  - IDtache : Long <<PK>> <<FK>>
+  - IDmembre : Long <<PK>> <<FK>>
+}
+
+entity "Note" as Note {
+  - id : Long <<PK>>
+  --
+  version : int
+  IDmembre : Long <<FK>>
+  description : String
+}
+
+enum "EtatTache" as EtatTache {
+  A_FAIRE
+  EN_COURS
+  TERMINE
+}
+
+enum "EtatMouvement" as EtatMouvement {
+  STAGE
+  DEPART
+  ARRIVEE
+}
+
+enum "EtatPret" as EtatPret {
+  EN_COURS
+  RENDU
+  EN_RETARD
+}
+
+enum "EtatAchat" as EtatAchat {
+  A_ACHETER
+  COMMANDE
+  RECU
+}
+
+' Mise en page guidée (rangées lisibles)
+Groupe -[hidden]down-> Tache
+Tache -[hidden]right-> Mouvement
+Mouvement -[hidden]right-> Pret
+Pret -[hidden]right-> Achat
+
+Tache -[hidden]down-> EtatTache
+EtatTache -[hidden]right-> EtatMouvement
+EtatMouvement -[hidden]right-> EtatPret
+EtatPret -[hidden]right-> EtatAchat
+
+Groupe -[hidden]left-> Membre
+Membre -[hidden]right-> MembreGroupe
+MembreGroupe -[hidden]right-> Note
+Note -[hidden]right-> Configuration
+
+Membre -[hidden]up-> Tache2Membre
+Tache2Membre -[hidden]left-> Tache
+
+Groupe ||--o{ Membre : CurrentGroupe
+Groupe ||--o{ Tache : possede
+Groupe ||--o{ Mouvement
+Groupe ||--o{ Pret
+Groupe ||--o{ Achat
+Groupe ||--o{ Configuration
+Groupe ||..o{ MembreGroupe
+
+Membre ||--o{ MembreGroupe
+Membre ||--o{ Note
+Membre ||--o{ Tache2Membre
+Membre ||--o{ Configuration
+
+Tache ||--o{ Tache2Membre
+
+Tache .. EtatTache
+Mouvement .. EtatMouvement
+Pret .. EtatPret
+Achat .. EtatAchat
+
+@enduml
