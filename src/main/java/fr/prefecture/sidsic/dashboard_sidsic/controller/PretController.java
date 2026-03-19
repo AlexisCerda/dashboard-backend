@@ -31,7 +31,7 @@ public class PretController {
     @GetMapping("/groupes/{idGroupe}/prets")
     public ResponseEntity<?> getAllPretGroupe(@PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.getAllPretsByGroupe(idGroupe)); // La méthode service retourne maintenant des DTO
+            return ResponseEntity.ok(groupeService.getAllPretsByGroupe(idGroupe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }

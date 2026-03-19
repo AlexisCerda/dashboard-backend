@@ -2,6 +2,7 @@ package fr.prefecture.sidsic.dashboard_sidsic.dto;
 
 import java.time.LocalDate;
 
+import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatMouvement;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,5 +14,5 @@ public class MouvementDTO {
     private String prenom;
     private LocalDate dateArrivee;
     private LocalDate dateDepart;
-
+    private EtatMouvement etat;
 }

@@ -1,6 +1,8 @@
 package fr.prefecture.sidsic.dashboard_sidsic.dto;
 
 import java.time.LocalDate;
+
+import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatPret;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +15,7 @@ public class PretDTO {
     private String nomPersonne;
     private String prenomPersonne;
     private int quantite;
+    private EtatPret etat;
     private LocalDate dateDebut;
     private LocalDate dateFin;
 }

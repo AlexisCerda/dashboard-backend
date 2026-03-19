@@ -83,8 +83,21 @@ public class TacheController {
         }
     }
 
+    @PutMapping("/taches")
+    public ResponseEntity<?> updateTache(@RequestBody TacheDTO tache){
+        if (tache.getId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("L'identifiant de la tâche est obligatoire");
+        }
+        try {
+            return ResponseEntity.ok(membreService.updateTacheDTO(tache));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/taches/{id}")
-    public ResponseEntity<?> updateTache(@PathVariable Long id, @RequestBody TacheDTO tache){
+    public ResponseEntity<?> updateTacheById(@PathVariable Long id, @RequestBody TacheDTO tache){
+        tache.setId(id);
         try {
             return ResponseEntity.ok(membreService.updateTacheDTO(tache));
         } catch (RuntimeException e) {

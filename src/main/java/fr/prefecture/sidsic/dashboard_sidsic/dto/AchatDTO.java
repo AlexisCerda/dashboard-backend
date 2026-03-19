@@ -1,5 +1,6 @@
 package fr.prefecture.sidsic.dashboard_sidsic.dto;
 
+import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatAchat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,4 +14,5 @@ public class AchatDTO {
     private String nomPersonne;
     private String prenomPersonne;
     private int quantite;
+    private EtatAchat etat;
 }

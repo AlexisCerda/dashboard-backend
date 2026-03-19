@@ -74,6 +74,7 @@ public class GroupeService {
       dto.setPrenom(mouvement.getPrenom());
       dto.setDateArrivee(mouvement.getDateArrivee());
       dto.setDateDepart(mouvement.getDateDepart());
+      dto.setEtat(mouvement.getEtat());
       return dto;
    }
 
@@ -85,6 +86,7 @@ public class GroupeService {
       dto.setNomPersonne(pret.getNomPersonne());
       dto.setPrenomPersonne(pret.getPrenomPersonne());
       dto.setQuantite(pret.getQuantite());
+      dto.setEtat(pret.getEtat());
       dto.setDateDebut(pret.getDateDebut());
       dto.setDateFin(pret.getDateFin());
       return dto;
@@ -95,9 +97,11 @@ public class GroupeService {
       dto.setId(achat.getId());
       dto.setNomMateriel(achat.getNomMateriel());
       dto.setMarqueMateriel(achat.getMarqueMateriel());
+      dto.setReference(achat.getReference());
       dto.setNomPersonne(achat.getNomPersonne());
       dto.setPrenomPersonne(achat.getPrenomPersonne());
       dto.setQuantite(achat.getQuantite());
+      dto.setEtat(achat.getEtat());
       return dto;
    }
 
@@ -398,6 +402,7 @@ public class GroupeService {
       mouvement.setNom(mouvementDTO.getNom());
       mouvement.setPrenom(mouvementDTO.getPrenom());
       mouvement.setGroupe(groupe);
+      mouvement.setEtat(mouvementDTO.getEtat());
       mouvementRepository.save(mouvement);
 
       String frequenceRadio = "/topic/groupe/" + idGroupe;
@@ -409,6 +414,7 @@ public class GroupeService {
       createdMouvementDTO.setDateDepart(mouvement.getDateDepart());
       createdMouvementDTO.setNom(mouvement.getNom());
       createdMouvementDTO.setPrenom(mouvement.getPrenom());
+      createdMouvementDTO.setEtat(mouvement.getEtat());
       return createdMouvementDTO;
    }
 
@@ -462,6 +468,9 @@ public class GroupeService {
       pret.setNomPersonne(pretDTO.getNomPersonne());
       pret.setPrenomPersonne(pretDTO.getPrenomPersonne());
       pret.setQuantite(pretDTO.getQuantite());
+      if (pretDTO.getEtat() != null) {
+         pret.setEtat(pretDTO.getEtat());
+      }
       pret.setDateDebut(pretDTO.getDateDebut());
       pret.setDateFin(pretDTO.getDateFin());
       pretRepository.save(pret);
@@ -476,6 +485,7 @@ public class GroupeService {
       updatedPretDTO.setNomPersonne(pret.getNomPersonne());
       updatedPretDTO.setPrenomPersonne(pret.getPrenomPersonne());
       updatedPretDTO.setQuantite(pret.getQuantite());
+      updatedPretDTO.setEtat(pret.getEtat());
       updatedPretDTO.setDateDebut(pret.getDateDebut());
       updatedPretDTO.setDateFin(pret.getDateFin());
       return updatedPretDTO;
@@ -491,6 +501,7 @@ public class GroupeService {
       pret.setNomPersonne(pretDTO.getNomPersonne());
       pret.setPrenomPersonne(pretDTO.getPrenomPersonne());
       pret.setQuantite(pretDTO.getQuantite());
+      pret.setEtat(pretDTO.getEtat() != null ? pretDTO.getEtat() : EtatPret.EN_COURS);
       pret.setDateDebut(pretDTO.getDateDebut());
       pret.setDateFin(pretDTO.getDateFin());
       pret.setGroupe(groupe);
@@ -506,6 +517,7 @@ public class GroupeService {
       createdPretDTO.setNomPersonne(pret.getNomPersonne());
       createdPretDTO.setPrenomPersonne(pret.getPrenomPersonne());
       createdPretDTO.setQuantite(pret.getQuantite());
+      createdPretDTO.setEtat(pret.getEtat());
       createdPretDTO.setDateDebut(pret.getDateDebut());
       createdPretDTO.setDateFin(pret.getDateFin());
       return createdPretDTO;
@@ -558,9 +570,13 @@ public class GroupeService {
       }
       achat.setNomMateriel(achatDTO.getNomMateriel());
       achat.setMarqueMateriel(achatDTO.getMarqueMateriel());
+      achat.setReference(achatDTO.getReference());
       achat.setNomPersonne(achatDTO.getNomPersonne());
       achat.setPrenomPersonne(achatDTO.getPrenomPersonne());
       achat.setQuantite(achatDTO.getQuantite());
+      if (achatDTO.getEtat() != null) {
+         achat.setEtat(achatDTO.getEtat());
+      }
       achatRepository.save(achat);
 
       String frequenceRadio = "/topic/groupe/" + idGroupe;
@@ -570,9 +586,11 @@ public class GroupeService {
       updatedAchatDTO.setId(achat.getId());
       updatedAchatDTO.setNomMateriel(achat.getNomMateriel());
       updatedAchatDTO.setMarqueMateriel(achat.getMarqueMateriel());
+      updatedAchatDTO.setReference(achat.getReference());
       updatedAchatDTO.setNomPersonne(achat.getNomPersonne());
       updatedAchatDTO.setPrenomPersonne(achat.getPrenomPersonne());
       updatedAchatDTO.setQuantite(achat.getQuantite());
+      updatedAchatDTO.setEtat(achat.getEtat());
       return updatedAchatDTO;
    }
 
@@ -593,11 +611,12 @@ public class GroupeService {
       Achat achat = new Achat();
       achat.setNomMateriel(achatDTO.getNomMateriel());
       achat.setMarqueMateriel(achatDTO.getMarqueMateriel());
+      achat.setReference(achatDTO.getReference());
       achat.setNomPersonne(achatDTO.getNomPersonne());
       achat.setPrenomPersonne(achatDTO.getPrenomPersonne());
       achat.setQuantite(achatDTO.getQuantite());
       achat.setGroupe(groupe);
-      achat.setEtat(EtatAchat.A_ACHETER);
+      achat.setEtat(achatDTO.getEtat() != null ? achatDTO.getEtat() : EtatAchat.à_ACHETER);
       achatRepository.save(achat);
 
       String frequenceRadio = "/topic/groupe/" + idGroupe;
@@ -607,9 +626,11 @@ public class GroupeService {
       createdAchatDTO.setId(achat.getId());
       createdAchatDTO.setNomMateriel(achat.getNomMateriel());
       createdAchatDTO.setMarqueMateriel(achat.getMarqueMateriel());
+      createdAchatDTO.setReference(achat.getReference());
       createdAchatDTO.setNomPersonne(achat.getNomPersonne());
       createdAchatDTO.setPrenomPersonne(achat.getPrenomPersonne());
       createdAchatDTO.setQuantite(achat.getQuantite());
+      createdAchatDTO.setEtat(achat.getEtat());
       return createdAchatDTO;
    }
 
