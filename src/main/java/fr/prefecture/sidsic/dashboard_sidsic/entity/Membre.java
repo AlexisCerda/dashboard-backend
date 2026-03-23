@@ -43,6 +43,8 @@ public class Membre implements UserDetails {
 
     @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Note> notes;
+    @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Image> images;
 
     @OneToMany(mappedBy = "membre",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Configuration> configurations;

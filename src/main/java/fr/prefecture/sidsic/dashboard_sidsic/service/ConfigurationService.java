@@ -38,6 +38,7 @@ public class ConfigurationService {
     dto.setAchats(configuration.getAchats());
     dto.setPrets(configuration.getPrets());
     dto.setMouvements(configuration.getMouvements());
+    dto.setImages(configuration.getImages());
     return dto;
   }
 
@@ -97,6 +98,7 @@ public class ConfigurationService {
     configuration.setAchats(configurationDTO.getAchats());
     configuration.setPrets(configurationDTO.getPrets());
     configuration.setMouvements(configurationDTO.getMouvements());
+    configuration.setImages(configurationDTO.getImages());
 
     return convertToDTO(configurationRepository.save(configuration));
   }

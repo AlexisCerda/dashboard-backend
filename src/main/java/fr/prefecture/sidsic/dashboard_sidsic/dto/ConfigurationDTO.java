@@ -15,4 +15,5 @@ public class ConfigurationDTO {
     private String achats;
     private String prets;
     private String mouvements;
+    private String images;
 }

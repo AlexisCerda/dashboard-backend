@@ -28,15 +28,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-          .csrf(csrf -> csrf.disable())
-          .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-          .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers(HttpMethod.PUT, "/api/membres/").permitAll()
-            .requestMatchers("/ws/**").permitAll()
-            .requestMatchers("/api/config/**").permitAll()
-            .requestMatchers("/error").permitAll()
-            .anyRequest().authenticated())
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/h2-console/**")
+                .disable()
+            )
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/membres/").permitAll()
+                .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/api/config/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
+                .requestMatchers("/error").permitAll()
+                .requestMatchers("/h2-console/**").permitAll() // 🚀 accès H2
+                .anyRequest().authenticated()
+            )
+            // 3. Autoriser les frames pour H2
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

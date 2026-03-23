@@ -1,5 +1,6 @@
 package fr.prefecture.sidsic.dashboard_sidsic.entity;
 
+import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatAchat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,28 +8,18 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Configuration {
+public class Image {
+    public Image(){}
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Version
     private int version;
-
+    private String nom;
+    private String path;
     @ManyToOne
     @JoinColumn(name = "IDmembre")
     private Membre membre;
 
-    @ManyToOne
-    @JoinColumn(name = "IDgroupe")
-    private Groupe groupe;
-
-    private String Nom;
-
-    private String Taches;
-    private String Notes;
-    private String Achats;
-    private String Prets;
-    private String Mouvements;
-    private String Images;
 }
