@@ -1,36 +1,36 @@
-# ⚙️ Dashboard SIDSIC - Back-End (API REST)
+# Dashboard SIDSIC - Back-End (API REST)
 
 Bienvenue sur le dépôt Back-End du projet **Dashboard SIDSIC**.
 Cette API, développée en Java avec Spring Boot, est le cœur logique de l'application. Elle gère la persistance des données, la sécurité, le stockage des fichiers physiques et la communication en temps réel (WebSockets) pour les bureaux virtuels collaboratifs de la Préfecture.
 
-🔗 **Front-End associé (React) :** [https://github.com/AlexisCerda/dashboard-frontend](https://github.com/AlexisCerda/dashboard-frontend)
+ **Front-End associé (React) :** [https://github.com/AlexisCerda/dashboard-frontend](https://github.com/AlexisCerda/dashboard-frontend)
 
 
 
-## ✨ Fonctionnalités Principales
+## Fonctionnalités Principales
 
-### 🗄️ Gestion des Données & Configurations
+###  Gestion des Données & Configurations
 * **Sauvegarde des Layouts :** Stockage des positions des widgets du bureau (coordonnées X, Y, W, H) au format JSON via des colonnes `LONGTEXT`.
 * **Base de données intégrée :** Utilisation de H2 Database avec persistance sur fichier local (`.mv.db`) pour une portabilité maximale.
 
-### 📁 Gestion Physique des Fichiers (Uploads)
+###  Gestion Physique des Fichiers (Uploads)
 * **API Multipart :** Endpoints dédiés à la réception de fichiers via `multipart/form-data`.
 * **Stockage Local :** Enregistrement physique des images directement à la racine du serveur dans un dossier `/uploads/`.
 * **Exposition des Ressources :** Configuration personnalisée via `WebMvcConfigurer` pour servir publiquement les images statiques au Front-End.
 * **Nettoyage intelligent :** Suppression synchronisée (lorsqu'une image est supprimée de la base de données, le fichier physique `.png`/`.jpg` est également effacé du disque dur pour éviter les fuites de stockage).
 
-### ⚡ Communication Temps Réel
+###  Communication Temps Réel
 * **WebSockets & STOMP :** Serveur WebSocket intégré pour diffuser des événements en direct aux clients connectés.
 * **Canaux ciblés :** Notifications de rafraîchissement envoyées sur des "topics" spécifiques (ex: `/topic/groupe/{id}` pour les membres, `/topic/membre/{id}` pour les images personnelles) afin d'éviter les requêtes API inutiles.
 
-### 🔐 Sécurité & Authentification
+###  Sécurité & Authentification
 * **Spring Security & JWT :** Sécurisation complète des routes de l'API avec des JSON Web Tokens (Bearer Token).
 * **Contrôle d'accès :** Vérification des permissions selon les rôles (Admin/Invité) directement côté serveur.
 * **CORS Configuré :** Autorisation des requêtes cross-origin pour communiquer fluidement avec le Front-End React.
 
 
 
-## 🛠️ Technologies & Stack Technique
+##  Technologies & Stack Technique
 
 * **Framework :** Java 17+ / Spring Boot 3
 * **Sécurité :** Spring Security, JWT (io.jsonwebtoken)
@@ -39,7 +39,7 @@ Cette API, développée en Java avec Spring Boot, est le cœur logique de l'appl
 * **Build Tool :** Maven (ou Gradle)
 
 
-## 🚀 Installation et Lancement (Local)
+##  Installation et Lancement (Local)
 
 ### 1. Prérequis
 * [Java JDK 17](https://adoptium.net/) (ou version supérieure).
@@ -70,7 +70,7 @@ Depuis votre terminal à la racine du projet :
 ./mvnw spring-boot:run
 L'API sera accessible sur http://localhost:8080.
 
-🗃️ Accès à la base de données (H2 Console)
+ Accès à la base de données (H2 Console)
 En environnement de développement, vous pouvez visualiser et modifier les tables en direct via l'interface web intégrée :
 
 Allez sur http://localhost:8080/h2-console
@@ -81,5 +81,5 @@ Utilisateur : sa (mot de passe vide par défaut).
 
 (Note : La sécurité Spring Security a été configurée pour autoriser les iframes et désactiver le CSRF spécifiquement sur cette route).
 
-👨‍💻 Auteur
+Auteur
 Développé par Alexis Cerda De Almeida Vilaca dans le cadre des projets de la Préfecture (SIDSIC).
