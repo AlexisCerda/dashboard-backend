@@ -31,4 +31,5 @@ public class Configuration {
     private String Prets;
     private String Mouvements;
     private String Images;
+    private String Equipe;
 }

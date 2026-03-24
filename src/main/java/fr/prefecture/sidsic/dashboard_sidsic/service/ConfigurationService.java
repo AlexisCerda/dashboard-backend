@@ -39,6 +39,7 @@ public class ConfigurationService {
     dto.setPrets(configuration.getPrets());
     dto.setMouvements(configuration.getMouvements());
     dto.setImages(configuration.getImages());
+    dto.setEquipe(configuration.getEquipe());
     return dto;
   }
 
@@ -83,6 +84,7 @@ public class ConfigurationService {
     configuration.setMembre(membre);
     configuration.setGroupe(groupe);
     configuration.setNom(nom);
+    configuration.setEquipe("");
 
     return convertToDTO(configurationRepository.save(configuration));
   }
@@ -99,6 +101,7 @@ public class ConfigurationService {
     configuration.setPrets(configurationDTO.getPrets());
     configuration.setMouvements(configurationDTO.getMouvements());
     configuration.setImages(configurationDTO.getImages());
+    configuration.setEquipe(configurationDTO.getEquipe());
 
     return convertToDTO(configurationRepository.save(configuration));
   }

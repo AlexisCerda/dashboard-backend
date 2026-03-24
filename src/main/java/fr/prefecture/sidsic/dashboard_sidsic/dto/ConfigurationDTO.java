@@ -16,4 +16,5 @@ public class ConfigurationDTO {
     private String prets;
     private String mouvements;
     private String images;
+    private String equipe;
 }
