@@ -24,12 +24,12 @@ public class JwtService {
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
-                .claims(extraClaims) // Informations supplémentaires (optionnel)
-                .subject(userDetails.getUsername()) // Le nom d'utilisateur (souvent l'email)
-                .issuedAt(new Date(System.currentTimeMillis())) // Date de création
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // Valable 24 heures !
-                .signWith(getSignInKey()) // On signe le badge avec le sceau secret
-                .compact(); // On imprime le badge sous forme de texte (le fameux Token)
+                .claims(extraClaims) 
+                .subject(userDetails.getUsername()) 
+                .issuedAt(new Date(System.currentTimeMillis())) 
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) 
+                .signWith(getSignInKey()) 
+                .compact(); 
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -56,7 +56,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey()) // On vérifie que personne n'a falsifié la signature
+                .verifyWith(getSignInKey()) 
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

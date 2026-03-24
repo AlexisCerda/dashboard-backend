@@ -66,7 +66,7 @@ public class GroupeService {
       dto.setId(groupe.getId());
       dto.setNom(groupe.getNom());
       dto.setVille(groupe.getVille());
-      // Ajoutez ici la conversion des listes si besoin
+
       return dto;
    }
 
@@ -247,7 +247,7 @@ public class GroupeService {
             .orElseThrow(() -> new RuntimeException("Membre not found"));
       Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
-      // Vérification d'unicité
+
       boolean existe = membreGroupeRepository.findAll().stream()
             .anyMatch(mg -> mg.getMembre().getId().equals(membre.getId())
                   && mg.getGroupe().getId().equals(groupe.getId()));
@@ -345,7 +345,6 @@ public class GroupeService {
       return convertToDTO(currentGroupe);
    }
 
-   // ##### PARTIE GESTION Mouvements ######
 
    public List<MouvementDTO> getAllMouvementsByGroupe(Long idGroupe) {
       Groupe groupe = groupeRepository.findById(idGroupe)
@@ -384,7 +383,7 @@ public class GroupeService {
    public MouvementDTO createMouvement(MouvementDTO mouvementDTO, Long idGroupe) {
       Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
-      // Vérification d'unicité : même nom, prénom et dates dans le même groupe
+
       boolean existe = groupe.getMouvements().stream()
             .anyMatch(m -> m.getNom().equalsIgnoreCase(mouvementDTO.getNom()) &&
                   m.getPrenom().equalsIgnoreCase(mouvementDTO.getPrenom()) &&
@@ -452,7 +451,6 @@ public class GroupeService {
       return etats;
    }
 
-   // ##### PARTIE GESTION PRET ######
    public List<PretDTO> getAllPretsByGroupe(Long idGroupe) {
       Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
@@ -557,7 +555,6 @@ public class GroupeService {
       return etats;
    }
 
-   // ##### PARTIE GESTION ACHAT ######
    public List<AchatDTO> getAllAchatsByGroupe(Long idGroupe) {
       Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
@@ -603,8 +600,8 @@ public class GroupeService {
    public AchatDTO createAchat(AchatDTO achatDTO, Long idGroupe) {
       Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
-      // Vérification d'unicité : même nom matériel, marque et personne dans le même
-      // groupe
+
+
       boolean existe = groupe.getAchats().stream()
             .anyMatch(a -> a.getNomMateriel().equalsIgnoreCase(achatDTO.getNomMateriel()) &&
                   a.getMarqueMateriel().equalsIgnoreCase(achatDTO.getMarqueMateriel()) &&

@@ -32,7 +32,7 @@ public class AchatController {
 	@GetMapping("/groupes/{idGroupe}/achats")
 	public ResponseEntity<?> getAllAchatGroupe(@PathVariable Long idGroupe) {
 		try {
-			return ResponseEntity.ok(groupeService.getAllAchatsByGroupe(idGroupe)); // La méthode service retourne maintenant des DTO
+			return ResponseEntity.ok(groupeService.getAllAchatsByGroupe(idGroupe)); 
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}

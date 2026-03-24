@@ -76,7 +76,7 @@ public class NoteController {
     @PostMapping("/membres/{idMembre}/notes")
     public ResponseEntity<?> createNoteByMembre(@PathVariable Long idMembre, @RequestBody NoteDTO noteDTO){
         try {
-            // Vérification d'unicité : même description pour le même membre
+
             Membre membre = membreService.GetMembre(membreService.getMembreById(idMembre));
             boolean existe = membre.getNotes() != null &&
                 membre.getNotes().stream().anyMatch(n -> n.getDescription().equalsIgnoreCase(noteDTO.getDescription()));

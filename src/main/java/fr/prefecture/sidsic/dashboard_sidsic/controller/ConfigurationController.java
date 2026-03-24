@@ -27,7 +27,8 @@ public class ConfigurationController {
     }
 
     @GetMapping("/groupes/{idGroupe}/membres/{idMembre}/configurations")
-    public ResponseEntity<?> getAllConfigurationsByGroupeAndMembre(@PathVariable Long idGroupe, @PathVariable Long idMembre) {
+    public ResponseEntity<?> getAllConfigurationsByGroupeAndMembre(@PathVariable Long idGroupe,
+            @PathVariable Long idMembre) {
         try {
             return ResponseEntity.ok(configurationService.getAllConfigurationsByGroupeAndMembre(idGroupe, idMembre));
         } catch (RuntimeException e) {
@@ -41,7 +42,8 @@ public class ConfigurationController {
     }
 
     @PostMapping("/groupes/{idGroupe}/membres/{idMembre}/configurations")
-    public ResponseEntity<?> createConfiguration(@PathVariable Long idGroupe, @PathVariable Long idMembre, @RequestBody String nom) {
+    public ResponseEntity<?> createConfiguration(@PathVariable Long idGroupe, @PathVariable Long idMembre,
+            @RequestBody String nom) {
         try {
             return ResponseEntity.ok(configurationService.createConfiguration(idMembre, idGroupe, nom));
         } catch (RuntimeException e) {
@@ -50,9 +52,10 @@ public class ConfigurationController {
     }
 
     @PatchMapping("/configurations")
-    public ResponseEntity<?> updateConfiguration( @RequestBody ConfigurationDTO configurationDTO) {
+    public ResponseEntity<?> updateConfiguration(@RequestBody ConfigurationDTO configurationDTO) {
         try {
-            return ResponseEntity.ok(configurationService.updateConfiguration(configurationDTO.getId(), configurationDTO));
+            return ResponseEntity
+                    .ok(configurationService.updateConfiguration(configurationDTO.getId(), configurationDTO));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/api/membres")
-@CrossOrigin(origins ="*")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class MembreController {
     private final MembreService membreService;
     private final GroupeService groupeService;

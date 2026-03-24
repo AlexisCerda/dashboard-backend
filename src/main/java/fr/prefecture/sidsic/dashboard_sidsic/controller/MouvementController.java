@@ -31,7 +31,7 @@ public class MouvementController {
     @GetMapping("/groupes/{idGroupe}/mouvements")
     public ResponseEntity<?> GetAllMouvementGroupe(@PathVariable Long idGroupe) {
         try {
-            return ResponseEntity.ok(groupeService.getAllMouvementsByGroupe(idGroupe)); // La méthode service retourne maintenant des DTO
+            return ResponseEntity.ok(groupeService.getAllMouvementsByGroupe(idGroupe)); 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }

@@ -185,7 +185,6 @@ public class MembreService {
     return m;
   }
 
-  // ##### PARTIE TACHE ######
 
   @Transactional
   public List<MembreDTO> addMembreToTache(Long idMembre, Long idTache) {
