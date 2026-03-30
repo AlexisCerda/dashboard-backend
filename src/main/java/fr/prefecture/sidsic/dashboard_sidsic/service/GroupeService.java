@@ -78,6 +78,9 @@ public class GroupeService {
       dto.setDateArrivee(mouvement.getDateArrivee());
       dto.setDateDepart(mouvement.getDateDepart());
       dto.setEtat(mouvement.getEtat());
+      dto.setService(mouvement.getService());
+      dto.setStatut(mouvement.getStatut());
+      dto.setUrlTicketGlpi(mouvement.getUrlTicketGlpi());
       return dto;
    }
 
@@ -116,6 +119,9 @@ public class GroupeService {
       dto.setDateDebut(tache.getDateDebut());
       dto.setDateLimite(tache.getDateLimite());
       dto.setEtat(tache.getEtat());
+      if (tache.getMouvement() != null) {
+         dto.setMouvement(convertMouvementToDTO(tache.getMouvement()));
+      }
       return dto;
    }
 
@@ -361,45 +367,28 @@ public class GroupeService {
       if (!mouvement.getGroupe().getId().equals(groupe.getId())) {
          throw new RuntimeException("Ce mouvement n'appartient pas à ce groupe");
       }
+      // Champs existants
       mouvement.setDateArrivee(mouvementDTO.getDateArrivee());
       mouvement.setDateDepart(mouvementDTO.getDateDepart());
       mouvement.setNom(mouvementDTO.getNom());
       mouvement.setPrenom(mouvementDTO.getPrenom());
-      groupeRepository.save(groupe);
 
+      // --- Nouveaux champs à ajouter ---
+      mouvement.setService(mouvementDTO.getService());
+      mouvement.setStatut(mouvementDTO.getStatut());
+      mouvement.setUrlTicketGlpi(mouvementDTO.getUrlTicketGlpi());
+      // ---------------------------------
+
+      groupeRepository.save(groupe);
       String frequenceRadio = "/topic/groupe/" + idGroupe;
       messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MOUVEMENTS");
-
-      MouvementDTO updatedMouvementDTO = new MouvementDTO();
-      updatedMouvementDTO.setId(mouvement.getId());
-      updatedMouvementDTO.setDateArrivee(mouvement.getDateArrivee());
-      updatedMouvementDTO.setDateDepart(mouvement.getDateDepart());
-      updatedMouvementDTO.setNom(mouvement.getNom());
-      updatedMouvementDTO.setPrenom(mouvement.getPrenom());
-      return updatedMouvementDTO;
+      return convertMouvementToDTO(mouvement); // Utilise la méthode de conversion qui gère déjà ces champs
    }
 
    @Transactional
    public MouvementDTO createMouvement(MouvementDTO mouvementDTO, Long idGroupe) {
       Groupe groupe = groupeRepository.findById(idGroupe)
             .orElseThrow(() -> new RuntimeException("Groupe not found"));
-
-      boolean existe = groupe.getMouvements().stream()
-            .anyMatch(m -> m.getNom().equalsIgnoreCase(mouvementDTO.getNom()) &&
-                  m.getPrenom().equalsIgnoreCase(mouvementDTO.getPrenom()) &&
-                  ((m.getDateArrivee() != null && m
-                        .getDateArrivee().equals(mouvementDTO.getDateArrivee()))
-                        ||
-                        (m.getDateArrivee() == null && mouvementDTO
-                              .getDateArrivee() == null))
-                  &&
-                  ((m.getDateDepart() != null && m.getDateDepart()
-                        .equals(mouvementDTO.getDateDepart())) ||
-                        (m.getDateDepart() == null && mouvementDTO
-                              .getDateDepart() == null)));
-      if (existe) {
-         throw new RuntimeException("Ce mouvement existe déjà dans ce groupe");
-      }
       Mouvement mouvement = new Mouvement();
       mouvement.setDateArrivee(mouvementDTO.getDateArrivee());
       mouvement.setDateDepart(mouvementDTO.getDateDepart());
@@ -407,19 +396,17 @@ public class GroupeService {
       mouvement.setPrenom(mouvementDTO.getPrenom());
       mouvement.setGroupe(groupe);
       mouvement.setEtat(mouvementDTO.getEtat());
-      mouvementRepository.save(mouvement);
 
+      // --- Nouveaux champs à ajouter ---
+      mouvement.setService(mouvementDTO.getService());
+      mouvement.setStatut(mouvementDTO.getStatut());
+      mouvement.setUrlTicketGlpi(mouvementDTO.getUrlTicketGlpi());
+      // ---------------------------------
+
+      mouvementRepository.save(mouvement);
       String frequenceRadio = "/topic/groupe/" + idGroupe;
       messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_MOUVEMENTS");
-
-      MouvementDTO createdMouvementDTO = new MouvementDTO();
-      createdMouvementDTO.setId(mouvement.getId());
-      createdMouvementDTO.setDateArrivee(mouvement.getDateArrivee());
-      createdMouvementDTO.setDateDepart(mouvement.getDateDepart());
-      createdMouvementDTO.setNom(mouvement.getNom());
-      createdMouvementDTO.setPrenom(mouvement.getPrenom());
-      createdMouvementDTO.setEtat(mouvement.getEtat());
-      return createdMouvementDTO;
+      return convertMouvementToDTO(mouvement);
    }
 
    @Transactional

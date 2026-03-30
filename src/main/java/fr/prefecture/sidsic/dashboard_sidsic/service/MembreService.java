@@ -14,15 +14,19 @@ import org.springframework.stereotype.Service;
 
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.MembreDTOLastCO;
+import fr.prefecture.sidsic.dashboard_sidsic.dto.MouvementDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Groupe;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Membre;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Mouvement;
 import fr.prefecture.sidsic.dashboard_sidsic.entity.Tache;
+import fr.prefecture.sidsic.dashboard_sidsic.entity.Mouvement;
 import fr.prefecture.sidsic.dashboard_sidsic.enums.EtatTache;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.GroupeRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreGroupeRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.MembreRepository;
 import fr.prefecture.sidsic.dashboard_sidsic.repository.TacheRepository;
+import fr.prefecture.sidsic.dashboard_sidsic.repository.MouvementRepository;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -33,17 +37,20 @@ public class MembreService {
   private final MembreGroupeRepository membreGroupeRepository;
   private final PasswordEncoder passwordEncoder;
 
+  private final MouvementRepository mouvementRepository;
+
   @Autowired
   private SimpMessagingTemplate messagingTemplate;
 
   public MembreService(MembreRepository membreRepository, TacheRepository tacheRepository,
       GroupeRepository groupeRepository, MembreGroupeRepository membreGroupeRepository,
-      PasswordEncoder passwordEncoder) {
+      PasswordEncoder passwordEncoder, MouvementRepository mouvementRepository) {
     this.membreRepository = membreRepository;
     this.tacheRepository = tacheRepository;
     this.groupeRepository = groupeRepository;
     this.membreGroupeRepository = membreGroupeRepository;
     this.passwordEncoder = passwordEncoder;
+    this.mouvementRepository = mouvementRepository;
   }
 
   public List<MembreDTO> recupererToutLesMembres() {
@@ -224,20 +231,24 @@ public class MembreService {
 
   public TacheDTO updateTacheDTO(TacheDTO tacheDTO) {
     Tache tache = tacheRepository.findById(tacheDTO.getId())
-        .orElseThrow(() -> new RuntimeException("Tache not found"));
-
+      .orElseThrow(() -> new RuntimeException("Tache not found"));
     tache.setNom(tacheDTO.getNom());
     tache.setDescription(tacheDTO.getDescription());
     tache.setDateDebut(tacheDTO.getDateDebut());
     tache.setDateLimite(tacheDTO.getDateLimite());
     tache.setEtat(tacheDTO.getEtat());
-
+    // --- MISE À JOUR DU LIEN MOUVEMENT ---
+    if (tacheDTO.getMouvement() != null && tacheDTO.getMouvement().getId() != null) {
+      Mouvement mouvement = mouvementRepository.findById(tacheDTO.getMouvement().getId()).orElse(null);
+      tache.setMouvement(mouvement);
+    } else {
+      tache.setMouvement(null);
+    }
+    // --------------------------------------
     tacheRepository.save(tache);
-
     Long idGroupe = tache.getGroupe().getId();
     String frequenceRadio = "/topic/groupe/" + idGroupe;
     messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
-
     return this.convertTacheToDTO(tache);
   }
 
@@ -259,26 +270,25 @@ public class MembreService {
   }
 
   public TacheDTO addTache(TacheDTO tacheDTO, Groupe groupe) {
-    if (tacheDTO.getNom() != null && tacheDTO.getNom().trim().length() > 0 && tacheDTO.getId() != null) {
-      Tache tacheExistante = tacheRepository.findById(tacheDTO.getId()).orElse(null);
-      if (tacheExistante != null && tacheExistante.getNom().equalsIgnoreCase(tacheDTO.getNom())) {
-        throw new RuntimeException("Cette tâche existe déjà dans ce groupe");
-      }
-    }
-    Tache tache = new Tache();
-    tache.setNom(tacheDTO.getNom());
-    tache.setGroupe(groupe);
-    tache.setDescription(tacheDTO.getDescription());
-    tache.setDateDebut(tacheDTO.getDateDebut());
-    tache.setDateLimite(tacheDTO.getDateLimite());
-    tache.setEtat(tacheDTO.getEtat() != null ? tacheDTO.getEtat() : EtatTache.à_FAIRE);
-    tacheRepository.save(tache);
-
-    Long idGroupe = groupe.getId();
-    String frequenceRadio = "/topic/groupe/" + idGroupe;
-    messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
-
-    return this.convertTacheToDTO(tache);
+      Tache tache = new Tache();
+      tache.setNom(tacheDTO.getNom());
+      tache.setGroupe(groupe);
+      tache.setDescription(tacheDTO.getDescription());
+      tache.setDateDebut(tacheDTO.getDateDebut());
+      tache.setDateLimite(tacheDTO.getDateLimite());
+      tache.setEtat(tacheDTO.getEtat() != null ? tacheDTO.getEtat() : EtatTache.à_FAIRE);
+      // --- Gestion du lien vers le Mouvement ---
+        if (tacheDTO.getMouvement() != null && tacheDTO.getMouvement().getId() != null) {
+          Mouvement mouvement = mouvementRepository.findById(tacheDTO.getMouvement().getId())
+            .orElseThrow(() -> new RuntimeException("Mouvement not found"));
+          tache.setMouvement(mouvement);
+        }
+      // ----------------------------------------- 
+      tacheRepository.save(tache);
+      Long idGroupe = groupe.getId();
+      String frequenceRadio = "/topic/groupe/" + idGroupe;
+      messagingTemplate.convertAndSend(frequenceRadio, "REFRESH_TACHES");
+      return this.convertTacheToDTO(tache);
   }
 
   public Tache getTacheById(Long id) {
@@ -314,6 +324,19 @@ public class MembreService {
       tacheDTO.setDateDebut(tache.getDateDebut());
       tacheDTO.setDateLimite(tache.getDateLimite());
       tacheDTO.setEtat(tache.getEtat());
+      if (tache.getMouvement() != null) {
+        MouvementDTO mouvementDTO = new MouvementDTO();
+        mouvementDTO.setId(tache.getMouvement().getId());
+        mouvementDTO.setNom(tache.getMouvement().getNom());
+        mouvementDTO.setPrenom(tache.getMouvement().getPrenom());
+        mouvementDTO.setDateArrivee(tache.getMouvement().getDateArrivee());
+        mouvementDTO.setDateDepart(tache.getMouvement().getDateDepart());
+        mouvementDTO.setEtat(tache.getMouvement().getEtat());
+        mouvementDTO.setService(tache.getMouvement().getService());
+        mouvementDTO.setStatut(tache.getMouvement().getStatut());
+        mouvementDTO.setUrlTicketGlpi(tache.getMouvement().getUrlTicketGlpi());
+        tacheDTO.setMouvement(mouvementDTO);
+      }
       tachesDTO.add(tacheDTO);
     }
     return tachesDTO;
@@ -327,6 +350,19 @@ public class MembreService {
     dto.setDateDebut(tache.getDateDebut());
     dto.setDateLimite(tache.getDateLimite());
     dto.setEtat(tache.getEtat());
+    if (tache.getMouvement() != null) {
+      MouvementDTO mouvementDTO = new MouvementDTO();
+      mouvementDTO.setId(tache.getMouvement().getId());
+      mouvementDTO.setNom(tache.getMouvement().getNom());
+      mouvementDTO.setPrenom(tache.getMouvement().getPrenom());
+      mouvementDTO.setDateArrivee(tache.getMouvement().getDateArrivee());
+      mouvementDTO.setDateDepart(tache.getMouvement().getDateDepart());
+      mouvementDTO.setEtat(tache.getMouvement().getEtat());
+      mouvementDTO.setService(tache.getMouvement().getService());
+      mouvementDTO.setStatut(tache.getMouvement().getStatut());
+      mouvementDTO.setUrlTicketGlpi(tache.getMouvement().getUrlTicketGlpi());
+      dto.setMouvement(mouvementDTO);
+    }
     return dto;
   }
 }

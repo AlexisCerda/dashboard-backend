@@ -36,4 +36,8 @@ public class Tache {
     @ManyToMany(mappedBy = "taches")
     private List<Membre> membres = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "mouvement_id", nullable = true)
+    private Mouvement mouvement;
+
 }

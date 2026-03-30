@@ -2,6 +2,7 @@ package fr.prefecture.sidsic.dashboard_sidsic.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.prefecture.sidsic.dashboard_sidsic.dto.MouvementDTO;
 import fr.prefecture.sidsic.dashboard_sidsic.dto.TacheDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -54,6 +55,19 @@ public class Groupe {
             tacheDTO.setDateDebut(tache.getDateDebut());
             tacheDTO.setDateLimite(tache.getDateLimite());
             tacheDTO.setEtat(tache.getEtat());
+            if (tache.getMouvement() != null) {
+                MouvementDTO mouvementDTO = new MouvementDTO();
+                mouvementDTO.setId(tache.getMouvement().getId());
+                mouvementDTO.setNom(tache.getMouvement().getNom());
+                mouvementDTO.setPrenom(tache.getMouvement().getPrenom());
+                mouvementDTO.setDateArrivee(tache.getMouvement().getDateArrivee());
+                mouvementDTO.setDateDepart(tache.getMouvement().getDateDepart());
+                mouvementDTO.setEtat(tache.getMouvement().getEtat());
+                mouvementDTO.setService(tache.getMouvement().getService());
+                mouvementDTO.setStatut(tache.getMouvement().getStatut());
+                mouvementDTO.setUrlTicketGlpi(tache.getMouvement().getUrlTicketGlpi());
+                tacheDTO.setMouvement(mouvementDTO);
+            }
             tachesDTO.add(tacheDTO);
         }
         return tachesDTO;

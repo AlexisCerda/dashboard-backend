@@ -15,4 +15,8 @@ public class MouvementDTO {
     private LocalDate dateArrivee;
     private LocalDate dateDepart;
     private EtatMouvement etat;
+
+    private String service;
+    private String statut;
+    private String urlTicketGlpi;
 }

@@ -32,5 +32,14 @@ public class Mouvement {
     private LocalDate dateArrivee;
     private LocalDate dateDepart;
 
+    @Column(length = 50)
+    private String service; // ex: BFLI, BCL
+
+    @Column(length = 50)
+    private String statut; // ex: Contractuelle, Stagiaire
+
+    @Column(length = 500)
+    private String urlTicketGlpi; // Le lien vers le ticket
+
 }
 

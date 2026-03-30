@@ -19,4 +19,5 @@ public class TacheDTO {
     private LocalDate dateDebut;
     private LocalDate dateLimite;
     private EtatTache etat;
+    private MouvementDTO mouvement;
 }
